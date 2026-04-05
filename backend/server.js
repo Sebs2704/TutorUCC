@@ -21,7 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rutas
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth',     require('./routes/auth'));
+app.use('/api/tutorias', require('./routes/tutorias'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
