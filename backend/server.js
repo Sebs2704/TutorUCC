@@ -14,7 +14,7 @@ conectarDB();
 // Middlewares
 app.use(cors({
     origin: '*', // En producción, cambia esto por tu dominio
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
