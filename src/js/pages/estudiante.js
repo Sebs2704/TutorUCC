@@ -157,6 +157,7 @@
 
   const _initCancelacion = () => {
     InasistenciasComponent.updateAlertText(document.getElementById('cancelacion-alert-body'));
+    InasistenciasComponent.renderChips(document.getElementById('historial-filter-chips'));
     InasistenciasComponent.render(document.getElementById('inasistencias-list'));
     SummaryComponent.render(document.getElementById('summary-grid'));
   };

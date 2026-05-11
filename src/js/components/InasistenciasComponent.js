@@ -58,10 +58,48 @@ const InasistenciasComponent = (() => {
     });
   };
 
+  const PERIODOS = [
+    { valor: '',       label: 'Todo'        },
+    { valor: 'hoy',    label: 'Hoy'         },
+    { valor: 'semana', label: 'Esta semana' },
+    { valor: 'mes',    label: 'Este mes'    },
+  ];
+
+  let _periodoActivo = '';
+
+  const _filtrarPorPeriodo = (tutorias, periodo) => {
+    if (!periodo) return tutorias;
+    const ahora = new Date();
+    const inicio = new Date(ahora);
+    if (periodo === 'hoy')    { inicio.setHours(0, 0, 0, 0); }
+    if (periodo === 'semana') { inicio.setDate(ahora.getDate() - 7); }
+    if (periodo === 'mes')    { inicio.setDate(1); inicio.setHours(0, 0, 0, 0); }
+    return tutorias.filter(t => new Date(t.creadoEn) >= inicio);
+  };
+
+  const renderChips = (container) => {
+    if (!container) return;
+    container.innerHTML = PERIODOS.map(p => `
+      <span class="chip ${p.valor === _periodoActivo ? 'active' : ''}"
+            data-periodo="${p.valor}" role="button" tabindex="0">
+        ${p.label}
+      </span>`).join('');
+
+    container.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        _periodoActivo = chip.dataset.periodo;
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const list = document.getElementById('inasistencias-list');
+        if (list) render(list);
+      });
+    });
+  };
+
   const render = (container) => {
     if (!container) return;
 
-    const tutorias = MisTutorias.getAll();
+    const tutorias = _filtrarPorPeriodo(MisTutorias.getAll(), _periodoActivo);
 
     if (tutorias.length === 0) {
       container.innerHTML = `
@@ -136,5 +174,5 @@ const InasistenciasComponent = (() => {
     if (alertBody) updateAlertText(alertBody);
   });
 
-  return { render, updateAlertText };
+  return { render, renderChips, updateAlertText };
 })();

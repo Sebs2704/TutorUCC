@@ -147,13 +147,49 @@
   };
 
   const _initTutorHistorial = () => {
-    const container = document.getElementById('tutor-historial-list');
+    const container  = document.getElementById('tutor-historial-list');
+    const chipsEl    = document.getElementById('tutor-historial-filter-chips');
     if (!container) return;
 
+    const PERIODOS = [
+      { valor: '',       label: 'Todo'        },
+      { valor: 'hoy',    label: 'Hoy'         },
+      { valor: 'semana', label: 'Esta semana' },
+      { valor: 'mes',    label: 'Este mes'    },
+    ];
+    let _periodo = '';
+
+    const _filtrar = (tutorias, periodo) => {
+      if (!periodo) return tutorias;
+      const ahora = new Date();
+      const inicio = new Date(ahora);
+      if (periodo === 'hoy')    { inicio.setHours(0, 0, 0, 0); }
+      if (periodo === 'semana') { inicio.setDate(ahora.getDate() - 7); }
+      if (periodo === 'mes')    { inicio.setDate(1); inicio.setHours(0, 0, 0, 0); }
+      return tutorias.filter(t => new Date(t.creadoEn) >= inicio);
+    };
+
+    if (chipsEl) {
+      chipsEl.innerHTML = PERIODOS.map(p => `
+        <span class="chip ${p.valor === '' ? 'active' : ''}" data-periodo="${p.valor}"
+              role="button" tabindex="0">${p.label}</span>`).join('');
+      chipsEl.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          _periodo = chip.dataset.periodo;
+          chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          _render();
+        });
+      });
+    }
+
     const _render = () => {
-      const tutorias = TutorTutorias.getAll()
-        .filter(t => t.estado === 'finalizada' || t.estado === 'cancelada')
-        .sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
+      const tutorias = _filtrar(
+        TutorTutorias.getAll()
+          .filter(t => t.estado === 'finalizada' || t.estado === 'cancelada')
+          .sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn)),
+        _periodo
+      );
 
       if (tutorias.length === 0) {
         container.innerHTML = `<div class="tutor-empty">
