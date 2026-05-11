@@ -5,8 +5,8 @@
   'use strict';
 
   // Si ya hay sesión activa, redirigir directo al dashboard correspondiente
-  const _tok = localStorage.getItem('token');
-  const _usr = JSON.parse(localStorage.getItem('usuario') || 'null');
+  const _tok = sessionStorage.getItem('token');
+  const _usr = JSON.parse(sessionStorage.getItem('usuario') || 'null');
   if (_tok && _usr) {
     const dest = { admin: 'admin.html', tutor: 'tutor.html' };
     window.location.replace(dest[_usr.rol] || 'estudiante.html');
@@ -51,8 +51,8 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.mensaje || 'Error al iniciar sesión');
 
-      localStorage.setItem('token',   data.token);
-      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      sessionStorage.setItem('token',   data.token);
+      sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
 
       const dest = { admin: 'admin.html', tutor: 'tutor.html' };
       window.location.href = dest[data.usuario.rol] || 'estudiante.html';

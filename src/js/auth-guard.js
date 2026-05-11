@@ -5,10 +5,10 @@
 (function () {
   'use strict';
 
-  var token   = localStorage.getItem('token');
+  var token   = sessionStorage.getItem('token');
   var usuario = null;
 
-  try { usuario = JSON.parse(localStorage.getItem('usuario') || 'null'); } catch (_) {}
+  try { usuario = JSON.parse(sessionStorage.getItem('usuario') || 'null'); } catch (_) {}
 
   if (!token || !usuario) {
     window.location.replace('index.html');
@@ -31,8 +31,8 @@
   }
 
   var logout = function () {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
     window.location.href = 'index.html';
   };
 

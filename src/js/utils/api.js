@@ -11,7 +11,7 @@ const Api = (() => {
   const BASE    = CONFIG.API_URL;
   const TIMEOUT = 10_000;
 
-  const token = () => localStorage.getItem('token');
+  const token = () => sessionStorage.getItem('token');
 
   const _headers = (json = true) => {
     const h = { Authorization: `Bearer ${token()}` };
