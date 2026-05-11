@@ -6,7 +6,7 @@ const { enviarCorreo, plantillaBase } = require('../utils/mailer');
 // Generar token JWT (incluye rol para validación sin DB en middlewares)
 const generarToken = (id, rol) => {
     return jwt.sign({ id, rol }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN
+        expiresIn: process.env.JWT_EXPIRES_IN?.trim() || '1d'
     });
 };
 
