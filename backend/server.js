@@ -14,7 +14,12 @@ conectarDB();
 // Middlewares
 const ALLOWED_ORIGINS = process.env.CLIENT_ORIGINS
     ? process.env.CLIENT_ORIGINS.split(',').map(o => o.trim())
-    : ['http://localhost:5500', 'http://127.0.0.1:5500', 'https://tutorucc-production.up.railway.app'];
+    : [
+        'http://localhost:5500',
+        'http://127.0.0.1:5500',
+        'https://tutorucc-production.up.railway.app',
+        'https://serene-manifestation-production-c7bf.up.railway.app'
+      ];
 
 app.use(cors({
     origin: (origin, cb) => {
