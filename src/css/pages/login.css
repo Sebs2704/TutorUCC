@@ -1,0 +1,135 @@
+#page-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--color-login-bg-from) 0%,
+    var(--color-login-bg-via) 50%,
+    var(--color-login-bg-to) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background decorative blobs */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.login-bg__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+.login-bg__blob--tl {
+  top: -5rem;
+  right: -5rem;
+  width: 20rem;
+  height: 20rem;
+  background: hsl(42, 80%, 55%, 0.08);
+}
+.login-bg__blob--br {
+  bottom: -5rem;
+  left: -5rem;
+  width: 24rem;
+  height: 24rem;
+  background: hsl(215, 70%, 38%, 0.10);
+}
+
+/* Card */
+.login-card {
+  position: relative;
+  z-index: var(--z-raised);
+  width: 100%;
+  max-width: 420px;
+  margin: var(--space-4);
+  background: var(--color-login-card);
+  border: 1px solid var(--color-login-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-login);
+  animation: slideUp var(--transition-slow) both;
+}
+
+/* Brand row */
+.login-card__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+}
+.login-card__brand-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+.login-card__brand-sub {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: hsl(215, 70%, 60%);
+  line-height: 1;
+  margin-top: 0.2rem;
+}
+.login-card__logo {
+  width: 4.5rem;
+  height: 4.5rem;
+  background: hsl(215, 30%, 25%);
+  border-radius: var(--radius-md);
+  border: 2px solid hsl(215, 20%, 35%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* 👈 importante */
+}
+.login-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* Form overrides for dark surface */
+.login-form .form-label { color: hsl(215, 20%, 85%); }
+.login-form .form-input {
+  background: var(--color-login-input);
+  border: none;
+  color: var(--color-fg);
+}
+.login-form .form-input::placeholder { color: var(--color-muted-fg); }
+.login-form .form-input:focus {
+  box-shadow: 0 0 0 3px hsl(215, 70%, 50%, 0.4);
+}
+
+/* Actions row */
+.login-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+/* Footer */
+.login-card__footer {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: hsl(215, 20%, 40%);
+  margin-top: var(--space-8);
+}
+
+/* 🔵 Botón login azul */
+#page-login .btn,
+#page-login .btn-primary {
+  background: hsl(215, 70%, 50%);
+  color: #fff;
+  border: none;
+}
+
+#page-login .btn:hover,
+#page-login .btn-primary:hover {
+  background: hsl(215, 70%, 45%);
+} 

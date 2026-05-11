@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutor UCC | Inicio de sesión</title>
+  <meta name="description" content="Plataforma de tutorías académicas — Universidad Cooperativa de Colombia" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/login.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════ LOGIN PAGE ══════════════════════ -->
+  <div id="page-login" class="page active" role="main" aria-label="Inicio de sesión">
+    <div class="login-bg">
+      <div class="login-bg__blob login-bg__blob--tl"></div>
+      <div class="login-bg__blob login-bg__blob--br"></div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card__brand">
+        <div>
+          <p class="login-card__brand-title">TutorUCC</p>
+        </div>
+        <div class="login-card__logo">
+          <img src="image/logo-ucc.png" alt="UCC">
+        </div>
+      </div>
+
+      <form id="form-login" class="login-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="login-email">Correo institucional</label>
+          <input id="login-email" name="email" type="email" class="form-input"
+            placeholder="usuario@campusucc.edu.co" autocomplete="email" required />
+          <span class="form-error" id="error-email" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Contraseña</label>
+          <input id="login-password" name="password" type="password" class="form-input"
+            autocomplete="current-password" required />
+          <span class="form-error" id="error-password" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="login-form__actions">
+          <button type="submit" class="btn btn--secondary btn--md">Iniciar sesión</button>
+          <button type="button" class="btn-link">¿Olvidó su contraseña?</button>
+        </div>
+      </form>
+
+      <p class="login-card__footer">© 2026 Tutor UCC. Todos los derechos reservados.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ MODAL: OLVIDÓ CONTRASEÑA ══════════════════════ -->
+  <div id="modal-recuperar" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-label="Recuperar contraseña">
+    <div class="modal-card modal-card--sm">
+      <div class="modal-card__header">
+        <h3 class="modal-card__title">Recuperar contraseña</h3>
+        <button type="button" class="modal-close" id="btn-cerrar-recuperar" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-card__body">
+        <p class="modal-hint">
+          Ingresa tu correo institucional y te enviaremos un enlace para restablecer tu contraseña.
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="recuperar-email">Correo institucional</label>
+          <input id="recuperar-email" type="email" class="form-input"
+            placeholder="usuario@campusucc.edu.co" autocomplete="email" />
+          <span class="form-error" id="recuperar-error" role="alert" aria-live="polite"></span>
+        </div>
+        <p id="recuperar-ok" class="form-ok" hidden></p>
+      </div>
+      <div class="modal-card__footer">
+        <button type="button" class="btn btn--outline btn--md" id="btn-cancelar-recuperar">Cancelar</button>
+        <button type="button" class="btn btn--secondary btn--md" id="btn-enviar-recuperar">Enviar enlace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"       defer></script>
+  <script src="js/pages/login.js"  defer></script>
+</body>
+</html>

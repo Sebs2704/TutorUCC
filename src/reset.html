@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutor UCC | Restablecer contraseña</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/login.css" />
+</head>
+<body>
+
+  <div id="page-login" class="page active" role="main" aria-label="Restablecer contraseña">
+    <div class="login-bg">
+      <div class="login-bg__blob login-bg__blob--tl"></div>
+      <div class="login-bg__blob login-bg__blob--br"></div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card__brand">
+        <div>
+          <p class="login-card__brand-title">TutorUCC</p>
+        </div>
+        <div class="login-card__logo">
+          <img src="image/logo-ucc.png" alt="UCC">
+        </div>
+      </div>
+
+      <!-- Estado: cargando / token inválido -->
+      <div id="estado-verificando">
+        <p style="text-align:center;color:#6b7280;font-size:.95rem;padding:8px 0;">Verificando enlace…</p>
+      </div>
+
+      <!-- Formulario de nueva contraseña -->
+      <form id="form-reset" class="login-form" novalidate hidden>
+        <h2 style="font-size:1.1rem;font-weight:700;color:#1f2937;margin-bottom:4px;">Nueva contraseña</h2>
+        <p style="font-size:.88rem;color:#6b7280;margin-bottom:20px;">Elige una contraseña segura para tu cuenta.</p>
+
+        <div class="form-group">
+          <label class="form-label" for="reset-nueva">Nueva contraseña</label>
+          <input id="reset-nueva" type="password" class="form-input"
+            placeholder="Mínimo 6 caracteres" autocomplete="new-password" required />
+          <span class="form-error" id="error-reset-nueva" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reset-confirmar">Confirmar contraseña</label>
+          <input id="reset-confirmar" type="password" class="form-input"
+            placeholder="Repite la contraseña" autocomplete="new-password" required />
+          <span class="form-error" id="error-reset-confirmar" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="login-form__actions">
+          <button type="submit" class="btn btn--secondary btn--md" id="btn-reset-submit">
+            Guardar contraseña
+          </button>
+        </div>
+      </form>
+
+      <!-- Estado: token inválido o expirado -->
+      <div id="estado-invalido" hidden>
+        <div style="text-align:center;padding:12px 0;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" style="margin-bottom:12px;">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <p style="font-weight:700;color:#1f2937;margin-bottom:6px;">Enlace inválido o expirado</p>
+          <p style="font-size:.88rem;color:#6b7280;margin-bottom:16px;">
+            El enlace de recuperación expiró o ya fue usado. Solicita uno nuevo desde la pantalla de inicio de sesión.
+          </p>
+          <a href="index.html" class="btn btn--secondary btn--md">Ir al inicio de sesión</a>
+        </div>
+      </div>
+
+      <!-- Estado: éxito -->
+      <div id="estado-exito" hidden>
+        <div style="text-align:center;padding:12px 0;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.5" style="margin-bottom:12px;">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <p style="font-weight:700;color:#1f2937;margin-bottom:6px;">¡Contraseña actualizada!</p>
+          <p style="font-size:.88rem;color:#6b7280;margin-bottom:16px;">
+            Tu contraseña fue cambiada exitosamente. Serás redirigido al inicio de sesión…
+          </p>
+          <a href="index.html" class="btn btn--secondary btn--md">Ir al inicio de sesión</a>
+        </div>
+      </div>
+
+      <p class="login-card__footer">© 2026 Tutor UCC. Todos los derechos reservados.</p>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const API_URL = 'https://tutorucc-production.up.railway.app/api';
+
+      const params = new URLSearchParams(window.location.search);
+      const token  = params.get('token');
+
+      const show = (id) => {
+        ['estado-verificando', 'form-reset', 'estado-invalido', 'estado-exito']
+          .forEach(el => {
+            const node = document.getElementById(el);
+            if (!node) return;
+            node.hidden = node.id !== id;
+          });
+      };
+
+      if (!token) {
+        show('estado-invalido');
+      } else {
+        show('form-reset');
+      }
+
+      document.getElementById('form-reset')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const nueva     = document.getElementById('reset-nueva')?.value;
+        const confirmar = document.getElementById('reset-confirmar')?.value;
+        const errorNueva     = document.getElementById('error-reset-nueva');
+        const errorConfirmar = document.getElementById('error-reset-confirmar');
+        const btn = document.getElementById('btn-reset-submit');
+
+        errorNueva.textContent     = '';
+        errorConfirmar.textContent = '';
+
+        if (!nueva || nueva.length < 6) {
+          errorNueva.textContent = 'La contraseña debe tener al menos 6 caracteres';
+          return;
+        }
+        if (nueva !== confirmar) {
+          errorConfirmar.textContent = 'Las contraseñas no coinciden';
+          return;
+        }
+
+        btn.textContent = 'Guardando…';
+        btn.disabled    = true;
+
+        try {
+          const res  = await fetch(`${API_URL}/auth/reset/${token}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: nueva }),
+          });
+          const data = await res.json();
+
+          if (res.ok) {
+            show('estado-exito');
+            setTimeout(() => { window.location.href = 'index.html'; }, 3000);
+          } else {
+            show('estado-invalido');
+          }
+        } catch {
+          errorNueva.textContent = 'Error de conexión. Intenta de nuevo.';
+          btn.textContent = 'Guardar contraseña';
+          btn.disabled    = false;
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>
