@@ -94,22 +94,30 @@
     </section>
 
     <section id="tab-tutor-calendario" class="tab-panel" role="tabpanel" hidden>
-      <div class="tutor-section-header">
-        <h2 class="tutor-section-header__title">Calendario de tutorías</h2>
-        <p class="tutor-section-header__sub">Tus sesiones pendientes y confirmadas del mes.</p>
-      </div>
       <div class="cal-layout">
-        <div class="cal-main card">
-          <div class="cal-header">
-            <button type="button" class="cal-nav-btn" id="tutor-cal-prev" aria-label="Mes anterior">&#8249;</button>
-            <h3 class="cal-month-title" id="tutor-cal-title">—</h3>
-            <button type="button" class="cal-nav-btn" id="tutor-cal-next" aria-label="Mes siguiente">&#8250;</button>
+        <div class="card cal-card">
+          <div class="cal-card__header">
+            <span class="cal-card__month-title" id="tutor-cal-title" aria-live="polite"></span>
+            <div class="cal-nav" role="group">
+              <button type="button" class="cal-nav__btn" id="tutor-cal-prev" aria-label="Mes anterior">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="cal-nav__btn" id="tutor-cal-next" aria-label="Mes siguiente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
           <div class="cal-grid" id="tutor-cal-grid" role="grid" aria-label="Calendario"></div>
+          <div class="cal-legend">
+            <div class="cal-legend__item"><span class="cal-legend__dot cal-legend__dot--today"></span>Hoy</div>
+            <div class="cal-legend__item"><span class="cal-legend__dot cal-legend__dot--event"></span>Tutoría agendada</div>
+          </div>
         </div>
         <aside class="cal-sidebar">
-          <h4 class="cal-sidebar__title">Próximas sesiones</h4>
-          <div id="tutor-cal-sidebar"></div>
+          <div class="card agendadas-panel">
+            <h3 class="agendadas-panel__title">Próximas sesiones</h3>
+            <div id="tutor-cal-sidebar"></div>
+          </div>
         </aside>
       </div>
     </section>

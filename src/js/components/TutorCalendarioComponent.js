@@ -47,8 +47,8 @@ const TutorCalendarioComponent = (() => {
       .filter(t => (t.estado === 'pendiente' || t.estado === 'confirmada') && t.fechaTutoria)
       .forEach(t => {
         const fecha = new Date(t.fechaTutoria);
-        if (fecha.getFullYear() === _year && fecha.getMonth() === _month)
-          dias.add(fecha.getDate());
+        if (fecha.getUTCFullYear() === _year && fecha.getUTCMonth() === _month)
+          dias.add(fecha.getUTCDate());
       });
     return dias;
   };
@@ -134,9 +134,9 @@ const TutorCalendarioComponent = (() => {
     const tutorias = TutorTutorias.getAll().filter(t => {
       if ((t.estado !== 'pendiente' && t.estado !== 'confirmada') || !t.fechaTutoria) return false;
       const fecha = new Date(t.fechaTutoria);
-      return fecha.getFullYear() === _year &&
-             fecha.getMonth()    === _month &&
-             fecha.getDate()     === dia;
+      return fecha.getUTCFullYear() === _year &&
+             fecha.getUTCMonth()    === _month &&
+             fecha.getUTCDate()     === dia;
     });
     _renderSidebar(tutorias, `Sin tutorías el ${dia} de ${MONTH_NAMES[_month]}.`);
   };
