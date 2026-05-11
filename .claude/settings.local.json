@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\jodas\\\\Desktop\\\\TutorUCC\\\\backend\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jodas\\\\Desktop\\\\TutorUCC\" -Recurse -Force)",
+      "Bash(sed 's/src=\"//')",
+      "Bash(sed 's/\".*//')"
+    ]
+  }
+}

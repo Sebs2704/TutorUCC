@@ -13,7 +13,9 @@ const UsuarioSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true,
-        match: [/^[\w.-]+@campusucc\.edu\.co$/, 'Solo se permiten correos institucionales (@campusucc.edu.co)']
+        match: process.env.ALLOW_ANY_EMAIL === 'true'
+            ? [/^[\w.-]+@[\w.-]+\.\w+$/, 'Correo inválido']
+            : [/^[\w.-]+@campusucc\.edu\.co$/, 'Solo se permiten correos institucionales (@campusucc.edu.co)'],
     },
     password: {
         type: String,
@@ -29,6 +31,14 @@ const UsuarioSchema = new mongoose.Schema({
     activo: {
         type: Boolean,
         default: true
+    },
+    resetToken: {
+        type: String,
+        select: false
+    },
+    resetTokenExpira: {
+        type: Date,
+        select: false
     },
     creadoEn: {
         type: Date,
