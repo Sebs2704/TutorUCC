@@ -5,6 +5,8 @@
 const Notificaciones = (() => {
   let _cache     = [];
   let _listeners = [];
+  let _intervalo = null;
+  const POLL_MS  = 20000; // 20 segundos
 
   const _cargar = async () => {
     if (!Api.token()) return [];
@@ -14,10 +16,18 @@ const Notificaciones = (() => {
     return _cache;
   };
 
+  const _iniciarPolling = () => {
+    if (_intervalo) return;
+    _intervalo = setInterval(() => {
+      if (!document.hidden) _cargar();
+    }, POLL_MS);
+  };
+
   const getAll      = () => _cache;
   const getNoLeidas = () => _cache.filter(n => !n.leida);
-  const recargar    = () => _cargar();
-  const onUpdate    = (fn) => _listeners.push(fn);
+  const onUpdate    = (fn) => { _listeners.push(fn); _iniciarPolling(); };
+
+  const recargar = () => _cargar();
 
   const marcarLeida = async (id) => {
     await Api.patch(`/notificaciones/${id}/leer`);
