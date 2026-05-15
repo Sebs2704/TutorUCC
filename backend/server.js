@@ -18,6 +18,7 @@ const ALLOWED_ORIGINS = process.env.CLIENT_ORIGINS
     : [
         'http://localhost:5500',
         'http://127.0.0.1:5500',
+        'https://tutorucc.up.railway.app',
         'https://tutorucc-production.up.railway.app',
         'https://serene-manifestation-production-c7bf.up.railway.app'
       ];

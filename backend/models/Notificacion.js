@@ -10,7 +10,7 @@ const NotificacionSchema = new mongoose.Schema({
     tutoria: { type: mongoose.Schema.Types.ObjectId, ref: 'Tutoria' },
     mensaje:  { type: String, required: true },
     leida:    { type: Boolean, default: false },
-    creadoEn: { type: Date,   default: Date.now }
+    creadoEn: { type: Date,   default: Date.now, expires: '30d' }
 });
 
 module.exports = mongoose.model('Notificacion', NotificacionSchema);
