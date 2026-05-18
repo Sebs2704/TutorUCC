@@ -26,6 +26,8 @@ const Notificaciones = (() => {
     if (_cache.some(n => n._id === notif._id)) return;
     _cache = [notif, ..._cache];
     _notificar();
+    // Avisa al resto de módulos para que recarguen sus datos si corresponde
+    document.dispatchEvent(new CustomEvent('tutorucc:notificacion-rt', { detail: notif }));
   };
 
   const _conectarSocket = () => {

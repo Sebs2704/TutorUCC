@@ -132,6 +132,18 @@
       document.getElementById('tutor-chips'),
       document.getElementById('tutor-stats')
     );
+
+    // Cuando llega una nueva solicitud en tiempo real, recargar la lista
+    document.addEventListener('tutorucc:notificacion-rt', async (e) => {
+      if (e.detail?.tipo === 'nueva_tutoria') {
+        await TutorTutorias.recargar();
+        TutorComponent.render(
+          document.getElementById('tutor-list'),
+          document.getElementById('tutor-chips'),
+          document.getElementById('tutor-stats')
+        );
+      }
+    });
   };
 
   const _initTutorCalendario = () => {
