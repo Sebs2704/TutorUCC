@@ -2,9 +2,13 @@ const dns = require('dns');
 dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 require('dotenv').config();
+const http    = require('http');
 const express = require('express');
-const cors = require('cors');
+const cors    = require('cors');
+const { Server } = require('socket.io');
+const jwt     = require('jsonwebtoken');
 const conectarDB = require('./config/db');
+const Socket  = require('./socket');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -12,7 +16,6 @@ app.set('trust proxy', 1);
 // Conectar a MongoDB
 conectarDB();
 
-// Middlewares
 const ALLOWED_ORIGINS = process.env.CLIENT_ORIGINS
     ? process.env.CLIENT_ORIGINS.split(',').map(o => o.trim())
     : [
@@ -41,17 +44,14 @@ app.use('/api/catalogo',       require('./routes/catalogo'));
 app.use('/api/notificaciones', require('./routes/notificaciones'));
 app.use('/api/admin',          require('./routes/admin'));
 
-// Ruta de prueba
 app.get('/', (req, res) => {
     res.json({ mensaje: '🎓 API TutorUCC funcionando correctamente' });
 });
 
-// Manejo de rutas no encontradas
 app.use((req, res) => {
     res.status(404).json({ mensaje: 'Ruta no encontrada' });
 });
 
-// Manejador global de errores
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     console.error('[ERROR]', err.stack || err.message || err);
@@ -59,8 +59,45 @@ app.use((err, req, res, next) => {
     res.status(status).json({ mensaje: err.message || 'Error interno del servidor' });
 });
 
+// ─── Socket.io ───────────────────────────────────────────────────────────────
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: ALLOWED_ORIGINS,
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+});
+
+// Autenticar cada conexión WebSocket con el mismo JWT de la API REST
+io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error('Token requerido'));
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        socket.usuarioId = payload.id ?? payload._id ?? payload.usuarioId;
+        next();
+    } catch {
+        next(new Error('Token inválido'));
+    }
+});
+
+io.on('connection', (socket) => {
+    // Cada usuario se une a su sala privada
+    socket.join(`user:${socket.usuarioId}`);
+    console.log(`[WS] Usuario ${socket.usuarioId} conectado`);
+
+    socket.on('disconnect', () => {
+        console.log(`[WS] Usuario ${socket.usuarioId} desconectado`);
+    });
+});
+
+// Exponer io a los controladores
+Socket.init(io);
+
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

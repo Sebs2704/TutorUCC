@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Tutoria  = require('../models/Tutoria');
 const nodemailer = require('nodemailer');
+const Socket   = require('../socket');
 
 /* ─────────────────────────────────────────────────────────────────
    CORREO
@@ -220,12 +221,13 @@ const agendar = async (req, res) => {
         // Notificación al tutor (directo con su ObjectId)
         try {
             const Notificacion = require('../models/Notificacion');
-            await Notificacion.create({
+            const notif = await Notificacion.create({
                 destinatario: tutorDoc._id.toString(),
                 tipo:    'nueva_tutoria',
                 tutoria: tutoria._id.toString(),
                 mensaje: `Nueva solicitud de ${estudiante.nombre}: ${materiaDoc.nombre} (${horario}).`,
             });
+            Socket.emitirNotificacion(tutorDoc._id.toString(), notif.toObject());
         } catch (_) { /* notificación opcional */ }
 
         res.status(201).json({ mensaje: 'Tutoría agendada correctamente', tutoria });
@@ -303,12 +305,13 @@ const confirmar = async (req, res) => {
 
         const Notificacion = require('../models/Notificacion');
 
-        await Notificacion.create({
+        const notifConfirm = await Notificacion.create({
             destinatario: tutoria.estudiante,
             tipo:    'confirmacion',
             tutoria: tutoria._id.toString(),
             mensaje: `Tu tutoría de ${tutoria.nombreMateria} con ${tutoria.nombreTutor} (${tutoria.horario}) ha sido confirmada. ✅`,
         });
+        Socket.emitirNotificacion(tutoria.estudiante, notifConfirm.toObject());
 
         res.json({ mensaje: 'Tutoría confirmada', tutoria });
     } catch (error) {
@@ -361,23 +364,25 @@ const cancelarTutor = async (req, res) => {
 
         const Notificacion = require('../models/Notificacion');
 
-        await Notificacion.create({
+        const notifCancel = await Notificacion.create({
             destinatario: tutoria.estudiante,
             tipo:    'cancelacion_tutor',
             tutoria: tutoria._id.toString(),
             mensaje: `Tu tutoría de ${nombreMateria} fue cancelada por el tutor. Motivo: "${motivo.trim()}".`,
         });
+        Socket.emitirNotificacion(tutoria.estudiante, notifCancel.toObject());
 
         if (nuevaTutoria && proximaFecha) {
             const fechaStr = proximaFecha.toLocaleDateString('es-CO', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             });
-            await Notificacion.create({
+            const notifReasig = await Notificacion.create({
                 destinatario: tutoria.estudiante,
                 tipo:    'reasignacion',
                 tutoria: nuevaTutoria._id.toString(),
                 mensaje: `Tu tutoría de ${nombreMateria} fue reasignada para el ${fechaStr} con ${tutoria.nombreTutor}.`,
             });
+            Socket.emitirNotificacion(tutoria.estudiante, notifReasig.toObject());
         }
 
         res.json({ mensaje: 'Tutoría cancelada y reasignada', tutoria, nuevaTutoria });
