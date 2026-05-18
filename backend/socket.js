@@ -25,4 +25,13 @@ const emitirDisponibilidad = ({ tutorId, horario }) => {
     _io.emit('disponibilidad-actualizada', { tutorId, horario });
 };
 
-module.exports = { init, emitirNotificacion, emitirDisponibilidad };
+/**
+ * Notifica a un estudiante que una de sus tutorías cambió de estado,
+ * para que recargue su lista sin necesidad de recargar la página.
+ */
+const emitirTutoriaActualizada = (estudianteId) => {
+    if (!_io) return;
+    _io.to(`user:${estudianteId}`).emit('tutoria-actualizada');
+};
+
+module.exports = { init, emitirNotificacion, emitirDisponibilidad, emitirTutoriaActualizada };

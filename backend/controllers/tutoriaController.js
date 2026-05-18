@@ -312,6 +312,7 @@ const confirmar = async (req, res) => {
             mensaje: `Tu tutoría de ${tutoria.nombreMateria} con ${tutoria.nombreTutor} (${tutoria.horario}) ha sido confirmada. ✅`,
         });
         Socket.emitirNotificacion(tutoria.estudiante, notifConfirm.toObject());
+        Socket.emitirTutoriaActualizada(tutoria.estudiante);
 
         // Avisar a todos los clientes que la disponibilidad de este slot cambió
         Socket.emitirDisponibilidad({
@@ -377,6 +378,7 @@ const cancelarTutor = async (req, res) => {
             mensaje: `Tu tutoría de ${nombreMateria} fue cancelada por el tutor. Motivo: "${motivo.trim()}".`,
         });
         Socket.emitirNotificacion(tutoria.estudiante, notifCancel.toObject());
+        Socket.emitirTutoriaActualizada(tutoria.estudiante);
 
         if (nuevaTutoria && proximaFecha) {
             const fechaStr = proximaFecha.toLocaleDateString('es-CO', {
@@ -409,6 +411,9 @@ const finalizar = async (req, res) => {
 
         tutoria.estado = 'finalizada';
         await tutoria.save();
+
+        Socket.emitirTutoriaActualizada(tutoria.estudiante);
+
         res.json({ mensaje: 'Tutoría finalizada', tutoria });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error interno del servidor' });

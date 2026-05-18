@@ -57,6 +57,10 @@ const Notificaciones = (() => {
       document.dispatchEvent(new CustomEvent('tutorucc:disponibilidad-rt', { detail: { tutorId, horario } }));
     });
 
+    _socket.on('tutoria-actualizada', () => {
+      document.dispatchEvent(new CustomEvent('tutorucc:tutorias-rt'));
+    });
+
     _socket.on('connect_error', (err) => {
       console.warn('[WS] Error de conexión, usando polling:', err.message);
       _iniciarPollFallback();

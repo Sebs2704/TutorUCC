@@ -29,6 +29,9 @@
   });
   setInterval(() => Notificaciones.recargar(), 60000);
 
+  // Cuando el tutor cambia el estado de una tutoría, recargar la lista del estudiante
+  document.addEventListener('tutorucc:tutorias-rt', () => MisTutorias.recargar());
+
   /* ── Modal de perfil ── */
   const _initPerfil = () => {
     const modal   = document.getElementById('modal-perfil');
