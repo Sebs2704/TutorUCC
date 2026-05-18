@@ -16,4 +16,13 @@ const emitirNotificacion = (usuarioId, notificacion) => {
     _io.to(`user:${usuarioId}`).emit('nueva-notificacion', notificacion);
 };
 
-module.exports = { init, emitirNotificacion };
+/**
+ * Broadcast a todos los clientes conectados indicando que la disponibilidad
+ * de un slot (tutorId + horario) cambió y deben refrescar sus cupos.
+ */
+const emitirDisponibilidad = ({ tutorId, horario }) => {
+    if (!_io) return;
+    _io.emit('disponibilidad-actualizada', { tutorId, horario });
+};
+
+module.exports = { init, emitirNotificacion, emitirDisponibilidad };

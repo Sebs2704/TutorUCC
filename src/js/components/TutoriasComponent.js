@@ -334,6 +334,19 @@ const TutoriasComponent = (() => {
     select.dataset.cargado = '1';
   };
 
+  /* ── Actualización en tiempo real de cupos cuando el tutor confirma ── */
+  document.addEventListener('tutorucc:disponibilidad-rt', async ({ detail }) => {
+    const { tutorId, horario } = detail;
+    // Busca la fila visible en cualquier panel abierto
+    const rowEl = document.querySelector(
+      `.tutor-row[data-tutor-id="${tutorId}"][data-horario="${horario}"]`
+    );
+    if (!rowEl) return; // panel no está abierto, nada que actualizar
+    const params = new URLSearchParams({ tutorId, horario });
+    const info   = await Api.get(`/tutorias/disponibilidad?${params}`);
+    _actualizarFila(rowEl, info.fechaTutoria !== undefined ? info : null);
+  });
+
   /* ── API pública ── */
   const render = (grid) => {
     if (!grid) return;

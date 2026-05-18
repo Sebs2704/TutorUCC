@@ -53,6 +53,10 @@ const Notificaciones = (() => {
       _agregarEnTiempoReal(notif);
     });
 
+    _socket.on('disponibilidad-actualizada', ({ tutorId, horario }) => {
+      document.dispatchEvent(new CustomEvent('tutorucc:disponibilidad-rt', { detail: { tutorId, horario } }));
+    });
+
     _socket.on('connect_error', (err) => {
       console.warn('[WS] Error de conexión, usando polling:', err.message);
       _iniciarPollFallback();

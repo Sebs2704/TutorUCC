@@ -93,10 +93,10 @@ const _contarOcupados = async (tutorId, horario, fecha) => {
     const inicio = new Date(fecha); inicio.setHours(0,0,0,0);
     const fin    = new Date(fecha); fin.setHours(23,59,59,999);
     return Tutoria.countDocuments({
-        tutor:        tutorId,   // ObjectId
+        tutor:        tutorId,
         horario,
         fechaTutoria: { $gte: inicio, $lte: fin },
-        estado:       { $in: ['pendiente','confirmada'] }
+        estado:       'confirmada'   // solo las aceptadas ocupan cupo
     });
 };
 
@@ -312,6 +312,12 @@ const confirmar = async (req, res) => {
             mensaje: `Tu tutoría de ${tutoria.nombreMateria} con ${tutoria.nombreTutor} (${tutoria.horario}) ha sido confirmada. ✅`,
         });
         Socket.emitirNotificacion(tutoria.estudiante, notifConfirm.toObject());
+
+        // Avisar a todos los clientes que la disponibilidad de este slot cambió
+        Socket.emitirDisponibilidad({
+            tutorId: tutoria.tutor,
+            horario: tutoria.horario,
+        });
 
         res.json({ mensaje: 'Tutoría confirmada', tutoria });
     } catch (error) {
