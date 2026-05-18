@@ -105,8 +105,8 @@ const _contarOcupados = async (tutorId, horario, fecha) => {
 ───────────────────────────────────────────────────────────────── */
 const _aplanar = (t) => ({
     ...t,
-    tutor:   t.tutor?.nombre   ?? t.tutor,
-    materia: t.materia?.nombre ?? t.materia,
+    tutor:   t.nombreTutor   ?? t.tutor,
+    materia: t.nombreMateria ?? t.materia,
 });
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -191,12 +191,14 @@ const agendar = async (req, res) => {
         }
 
         const tutoria = await Tutoria.create({
-            estudiante:       estudiante._id,
-            tutor:            tutorDoc._id,
-            materia:          materiaDoc._id,
+            estudiante:       estudiante._id.toString(),
+            tutor:            tutorDoc._id.toString(),
+            materia:          materiaDoc._id.toString(),
             horarioTutor:     horarioTutorId || null,
             nombreEstudiante: estudiante.nombre,
             correoEstudiante: estudiante.correo,
+            nombreTutor:      tutorDoc.nombre,
+            nombreMateria:    materiaDoc.nombre,
             semestre,
             horario,
             aula,
@@ -219,9 +221,9 @@ const agendar = async (req, res) => {
         try {
             const Notificacion = require('../models/Notificacion');
             await Notificacion.create({
-                destinatario: tutorDoc._id,
+                destinatario: tutorDoc._id.toString(),
                 tipo:    'nueva_tutoria',
-                tutoria: tutoria._id,
+                tutoria: tutoria._id.toString(),
                 mensaje: `Nueva solicitud de ${estudiante.nombre}: ${materiaDoc.nombre} (${horario}).`,
             });
         } catch (_) { /* notificación opcional */ }
@@ -239,8 +241,6 @@ const misTutorias = async (req, res) => {
     try {
         const tutorias = await Tutoria
             .find({ estudiante: req.usuarioId })
-            .populate('tutor',   'nombre')
-            .populate('materia', 'nombre semestre')
             .sort({ creadoEn: -1 })
             .lean();
 
@@ -257,18 +257,12 @@ const tutorTutorias = async (req, res) => {
     try {
         const tutorias = await Tutoria
             .find({ tutor: req.usuarioId })
-            .populate('estudiante', 'nombre correo')
-            .populate('materia',    'nombre semestre')
             .sort({ creadoEn: -1 })
             .lean();
 
-        // El frontend usa t.nombreEstudiante, t.correoEstudiante (desnormalizado)
-        // y t.materia como string — lo aplanamos
         const result = tutorias.map(t => ({
             ...t,
-            materia:          t.materia?.nombre   ?? t.materia,
-            nombreEstudiante: t.nombreEstudiante  || t.estudiante?.nombre || '',
-            correoEstudiante: t.correoEstudiante  || t.estudiante?.correo || '',
+            materia: t.nombreMateria ?? t.materia,
         }));
 
         res.json({ tutorias: result });
@@ -299,9 +293,7 @@ const cancelar = async (req, res) => {
 // @access Privado (tutor)
 const confirmar = async (req, res) => {
     try {
-        const tutoria = await Tutoria
-            .findOne({ _id: req.params.id, tutor: req.usuarioId })
-            .populate('materia', 'nombre');
+        const tutoria = await Tutoria.findOne({ _id: req.params.id, tutor: req.usuarioId });
         if (!tutoria) return res.status(404).json({ mensaje: 'Tutoría no encontrada' });
         if (tutoria.estado !== 'pendiente')
             return res.status(400).json({ mensaje: 'Solo se pueden confirmar tutorías pendientes' });
@@ -310,14 +302,12 @@ const confirmar = async (req, res) => {
         await tutoria.save();
 
         const Notificacion = require('../models/Notificacion');
-        const Usuario = require('../models/Usuario');
-        const tutorDoc = await Usuario.findById(req.usuarioId).select('nombre');
 
         await Notificacion.create({
             destinatario: tutoria.estudiante,
             tipo:    'confirmacion',
-            tutoria: tutoria._id,
-            mensaje: `Tu tutoría de ${tutoria.materia?.nombre ?? tutoria.materia} con ${tutorDoc?.nombre} (${tutoria.horario}) ha sido confirmada. ✅`,
+            tutoria: tutoria._id.toString(),
+            mensaje: `Tu tutoría de ${tutoria.nombreMateria} con ${tutoria.nombreTutor} (${tutoria.horario}) ha sido confirmada. ✅`,
         });
 
         res.json({ mensaje: 'Tutoría confirmada', tutoria });
@@ -334,16 +324,12 @@ const cancelarTutor = async (req, res) => {
         const { motivo } = req.body;
         if (!motivo?.trim()) return res.status(400).json({ mensaje: 'El motivo de cancelación es obligatorio' });
 
-        const tutoria = await Tutoria
-            .findOne({ _id: req.params.id, tutor: req.usuarioId })
-            .populate('materia', 'nombre');
+        const tutoria = await Tutoria.findOne({ _id: req.params.id, tutor: req.usuarioId });
         if (!tutoria) return res.status(404).json({ mensaje: 'Tutoría no encontrada' });
         if (tutoria.estado === 'finalizada' || tutoria.estado === 'cancelada')
             return res.status(400).json({ mensaje: 'Esta tutoría no puede ser cancelada' });
 
-        const nombreMateria = tutoria.materia?.nombre ?? String(tutoria.materia);
-        const Usuario = require('../models/Usuario');
-        const tutorDoc = await Usuario.findById(req.usuarioId).select('nombre');
+        const nombreMateria = tutoria.nombreMateria;
 
         tutoria.estado = 'cancelada';
         tutoria.motivoCancelacion = motivo.trim();
@@ -357,8 +343,10 @@ const cancelarTutor = async (req, res) => {
             nuevaTutoria = await Tutoria.create({
                 estudiante:       tutoria.estudiante,
                 tutor:            tutoria.tutor,
-                materia:          tutoria.materia._id ?? tutoria.materia,
+                materia:          tutoria.materia,
                 horarioTutor:     tutoria.horarioTutor,
+                nombreTutor:      tutoria.nombreTutor,
+                nombreMateria:    tutoria.nombreMateria,
                 nombreEstudiante: tutoria.nombreEstudiante,
                 correoEstudiante: tutoria.correoEstudiante,
                 semestre:         tutoria.semestre,
@@ -376,7 +364,7 @@ const cancelarTutor = async (req, res) => {
         await Notificacion.create({
             destinatario: tutoria.estudiante,
             tipo:    'cancelacion_tutor',
-            tutoria: tutoria._id,
+            tutoria: tutoria._id.toString(),
             mensaje: `Tu tutoría de ${nombreMateria} fue cancelada por el tutor. Motivo: "${motivo.trim()}".`,
         });
 
@@ -387,8 +375,8 @@ const cancelarTutor = async (req, res) => {
             await Notificacion.create({
                 destinatario: tutoria.estudiante,
                 tipo:    'reasignacion',
-                tutoria: nuevaTutoria._id,
-                mensaje: `Tu tutoría de ${nombreMateria} fue reasignada para el ${fechaStr} con ${tutorDoc?.nombre}.`,
+                tutoria: nuevaTutoria._id.toString(),
+                mensaje: `Tu tutoría de ${nombreMateria} fue reasignada para el ${fechaStr} con ${tutoria.nombreTutor}.`,
             });
         }
 

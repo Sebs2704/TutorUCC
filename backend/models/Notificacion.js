@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const NotificacionSchema = new mongoose.Schema({
-    destinatario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    destinatario: { type: String, required: true },
     tipo: {
         type: String,
         enum: ['confirmacion', 'cancelacion_tutor', 'reasignacion', 'nueva_tutoria'],
         required: true
     },
-    tutoria: { type: mongoose.Schema.Types.ObjectId, ref: 'Tutoria' },
+    tutoria: { type: String },
     mensaje:  { type: String, required: true },
     leida:    { type: Boolean, default: false },
     creadoEn: { type: Date,   default: Date.now, expires: '30d' }

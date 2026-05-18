@@ -85,21 +85,60 @@ const TutorEstudiantesComponent = (() => {
     const tutorias = TutorTutorias.getAll();
     if (tutorias.length === 0) return;
 
-    const cabecera = ['Estudiante','Correo','Materia','Semestre','Horario','Aula','Estado','Fecha agendada','Comentario','Motivo cancelación'];
-    const filas = tutorias.map(t => [
-      t.nombreEstudiante,
-      t.correoEstudiante,
-      t.materia,
-      t.semestre,
-      t.horario,
-      t.aula,
-      t.estado,
-      new Date(t.creadoEn).toLocaleDateString('es-CO'),
-      t.comentario  || '',
-      t.motivoCancelacion || '',
-    ].map(v => `"${String(v).replace(/"/g, '""')}"`));
+    const total       = tutorias.length;
+    const finalizadas = tutorias.filter(t => t.estado === 'finalizada').length;
+    const pendientes  = tutorias.filter(t => t.estado === 'pendiente').length;
+    const canceladas  = tutorias.filter(t => t.estado === 'cancelada').length;
 
-    const csv = [cabecera.join(','), ...filas.map(f => f.join(','))].join('\r\n');
+    const tutorNombre = (typeof AuthGuard !== 'undefined' && AuthGuard.usuario?.nombre) || 'Tutor';
+    const fechaHoy    = new Date().toLocaleDateString('es-CO', { day:'numeric', month:'long', year:'numeric' });
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const filas = tutorias.map((t, i) => {
+      const fecha = new Date(t.creadoEn).toLocaleDateString('es-CO',
+        { day:'2-digit', month:'2-digit', year:'numeric' });
+      return [
+        i + 1,
+        q(t.nombreEstudiante),
+        q(t.correoEstudiante),
+        q(t.materia),
+        q(`Semestre ${t.semestre}`),
+        q(t.horario),
+        q(`Aula ${t.aula}`),
+        q(cap(t.estado)),
+        q(fecha),
+        q(t.comentario || ''),
+        q(t.motivoCancelacion || ''),
+      ].join(';');
+    });
+
+    const pct = (n) => total > 0 ? `${Math.round(n / total * 100)}%` : '0%';
+
+    const lineas = [
+      // ── Encabezado ──────────────────────────────────────────
+      `"REPORTE DE TUTORÍAS — TutorUCC"`,
+      `"Universidad Cooperativa de Colombia"`,
+      ``,
+      `"Tutor:";${q(tutorNombre)}`,
+      `"Fecha de generación:";${q(fechaHoy)}`,
+      ``,
+      // ── Resumen ─────────────────────────────────────────────
+      `"════ RESUMEN ════"`,
+      `"Total de tutorías:";${total}`,
+      `"Finalizadas:";${finalizadas};"(${pct(finalizadas)})"`,
+      `"Pendientes:";${pendientes};"(${pct(pendientes)})"`,
+      `"Canceladas:";${canceladas};"(${pct(canceladas)})"`,
+      ``,
+      // ── Tabla de datos ───────────────────────────────────────
+      `"════ DETALLE DE TUTORÍAS ════"`,
+      `"#";"Estudiante";"Correo";"Materia";"Semestre";"Horario";"Aula";"Estado";"Fecha agendada";"Comentario";"Motivo cancelación"`,
+      ...filas,
+      ``,
+      `"Generado automáticamente por TutorUCC"`,
+    ];
+
+    const csv  = lineas.join('\r\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');

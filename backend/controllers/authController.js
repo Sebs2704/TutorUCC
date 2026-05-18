@@ -1,6 +1,8 @@
-const crypto = require('crypto');
-const Usuario = require('../models/Usuario');
-const jwt = require('jsonwebtoken');
+const crypto       = require('crypto');
+const Usuario      = require('../models/Usuario');
+const Estudiante   = require('../models/Estudiante');
+const Docente      = require('../models/Docente');
+const jwt          = require('jsonwebtoken');
 const { enviarCorreo, plantillaBase } = require('../utils/mailer');
 
 // Generar token JWT (incluye rol para validación sin DB en middlewares)
@@ -17,7 +19,7 @@ const ROLES_PUBLICOS = ['estudiante', 'tutor'];
 
 const registro = async (req, res) => {
     try {
-        const { nombre, correo, password, rol } = req.body;
+        const { nombre, correo, password, rol, codigo, departamento } = req.body;
 
         if (!nombre?.trim() || !correo?.trim() || !password)
             return res.status(400).json({ mensaje: 'Nombre, correo y contraseña son obligatorios' });
@@ -25,14 +27,32 @@ const registro = async (req, res) => {
         if (!ROLES_PUBLICOS.includes(rol))
             return res.status(400).json({ mensaje: 'Rol inválido. Solo se permiten: estudiante, tutor' });
 
-        // Verificar si el usuario ya existe
-        const usuarioExiste = await Usuario.findOne({ correo });
-        if (usuarioExiste) {
-            return res.status(400).json({ mensaje: 'Ya existe una cuenta con ese correo' });
+        if (rol === 'estudiante') {
+            if (!codigo) return res.status(400).json({ mensaje: 'El código estudiantil es obligatorio' });
+            if (!/^\d{6}$/.test(codigo)) return res.status(400).json({ mensaje: 'El código debe ser de exactamente 6 dígitos numéricos' });
+            const existeCodigo = await Estudiante.findOne({ codigo });
+            if (existeCodigo) return res.status(400).json({ mensaje: 'Ya existe un estudiante con ese código' });
         }
 
-        // Crear usuario
+        const usuarioExiste = await Usuario.findOne({ correo });
+        if (usuarioExiste) return res.status(400).json({ mensaje: 'Ya existe una cuenta con ese correo' });
+
         const usuario = await Usuario.create({ nombre, correo, password, rol });
+
+        try {
+            if (rol === 'estudiante') {
+                await Estudiante.create({ nombre, correo, codigo });
+            } else if (rol === 'tutor') {
+                await Docente.create({
+                    nombre,
+                    correo,
+                    departamento: departamento || 'Ingeniería de Sistemas',
+                });
+            }
+        } catch (roleError) {
+            await Usuario.findByIdAndDelete(usuario._id);
+            throw roleError;
+        }
 
         const token = generarToken(usuario._id, usuario.rol);
 
@@ -40,14 +60,13 @@ const registro = async (req, res) => {
             mensaje: 'Usuario registrado correctamente',
             token,
             usuario: {
-                id: usuario._id,
+                id:     usuario._id,
                 nombre: usuario.nombre,
                 correo: usuario.correo,
-                rol: usuario.rol
+                rol:    usuario.rol
             }
         });
     } catch (error) {
-        // Mostrar errores de validación de Mongoose de forma amigable
         if (error.name === 'ValidationError') {
             const mensajes = Object.values(error.errors).map(e => e.message);
             return res.status(400).json({ mensaje: mensajes.join(', ') });

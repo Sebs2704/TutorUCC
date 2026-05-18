@@ -1,19 +1,19 @@
 /**
  * seed_usuarios.js
- * Crea las cuentas de tutores + estudiantes de prueba en la colección usuarios.
+ * Crea tutores + estudiantes de prueba en usuarios Y en su colección de rol.
  * Uso: cd backend && node scripts/seed_usuarios.js
  *
- * Contraseña por defecto para todos los tutores: Tutoria2026
- * Contraseña por defecto para estudiantes de prueba: Estudio2026
- *
+ * Contraseñas por defecto: tutores → Tutoria2026 | estudiantes → Estudio2026
  * IMPORTANTE: Ejecutar UNA sola vez. Si se corre de nuevo, omite los que ya existen.
  */
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const dns      = require('dns');
 dns.setServers(['1.1.1.1', '8.8.8.8']);
-const mongoose = require('mongoose');
-const Usuario  = require('../models/Usuario');
+const mongoose   = require('mongoose');
+const Usuario    = require('../models/Usuario');
+const Docente    = require('../models/Docente');
+const Estudiante = require('../models/Estudiante');
 
 const TUTORES = [
     { nombre: 'Daniel Bejarano Segura',        correo: 'bejaranods@campusucc.edu.co' },
@@ -32,19 +32,19 @@ const TUTORES = [
 ];
 
 const ESTUDIANTES_PRUEBA = [
-    { nombre: 'Estudiante Prueba Uno',  correo: 'estudiante1@campusucc.edu.co' },
-    { nombre: 'Estudiante Prueba Dos',  correo: 'estudiante2@campusucc.edu.co' },
-    { nombre: 'Estudiante Prueba Tres', correo: 'estudiante3@campusucc.edu.co' },
+    { nombre: 'Estudiante Prueba Uno',  correo: 'estudiante1@campusucc.edu.co', codigo: '100001' },
+    { nombre: 'Estudiante Prueba Dos',  correo: 'estudiante2@campusucc.edu.co', codigo: '100002' },
+    { nombre: 'Estudiante Prueba Tres', correo: 'estudiante3@campusucc.edu.co', codigo: '100003' },
 ];
 
 async function seed() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Conectado a MongoDB');
 
-    let creados   = 0;
-    let omitidos  = 0;
+    let creados  = 0;
+    let omitidos = 0;
 
-    // ── Tutores ──────────────────────────────────────────────────
+    // ── Tutores → usuarios + docentes ────────────────────────────
     for (const t of TUTORES) {
         const existe = await Usuario.findOne({ correo: t.correo });
         if (existe) {
@@ -53,11 +53,12 @@ async function seed() {
             continue;
         }
         await Usuario.create({ ...t, password: 'Tutoria2026', rol: 'tutor' });
+        await Docente.create({ nombre: t.nombre, correo: t.correo });
         console.log(`  ✅ Tutor creado: ${t.nombre} → ${t.correo}`);
         creados++;
     }
 
-    // ── Estudiantes de prueba ─────────────────────────────────────
+    // ── Estudiantes → usuarios + estudiantes ──────────────────────
     for (const e of ESTUDIANTES_PRUEBA) {
         const existe = await Usuario.findOne({ correo: e.correo });
         if (existe) {
@@ -66,6 +67,7 @@ async function seed() {
             continue;
         }
         await Usuario.create({ ...e, password: 'Estudio2026', rol: 'estudiante' });
+        await Estudiante.create({ nombre: e.nombre, correo: e.correo, codigo: e.codigo });
         console.log(`  ✅ Estudiante creado: ${e.nombre} → ${e.correo}`);
         creados++;
     }

@@ -15,14 +15,15 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }
 const dns = require('dns');
 dns.setServers(['1.1.1.1', '8.8.8.8']);
 
-const mongoose     = require('mongoose');
-const Usuario      = require('../models/Usuario');
-const Docente      = require('../models/Docente');
-const Estudiante   = require('../models/Estudiante');
-const Materia      = require('../models/Materia');
-const HorarioTutor = require('../models/HorarioTutor');
-const Tutoria      = require('../models/Tutoria');
-const Notificacion = require('../models/Notificacion');
+const mongoose      = require('mongoose');
+const Usuario       = require('../models/Usuario');
+const Docente       = require('../models/Docente');
+const Estudiante    = require('../models/Estudiante');
+const Administrador = require('../models/Administrador');
+const Materia       = require('../models/Materia');
+const HorarioTutor  = require('../models/HorarioTutor');
+const Tutoria       = require('../models/Tutoria');
+const Notificacion  = require('../models/Notificacion');
 
 /* ═══════════════════════════════════════════════════════════════
    DATOS: USUARIOS
@@ -329,9 +330,23 @@ async function seed() {
         Usuario.deleteMany({}),
         Docente.deleteMany({}),
         Estudiante.deleteMany({}),
+        Administrador.deleteMany({}),
     ]);
 
-    let creados = 0, docentesCreados = 0, estudiantesCreados = 0;
+    // Eliminar índices obsoletos (campo "usuario") que quedaron del esquema anterior
+    const db = mongoose.connection.db;
+    const dropIdx = async (col, idx) => {
+        try { await db.collection(col).dropIndex(idx); } catch (_) { /* ya no existe */ }
+    };
+    await Promise.all([
+        dropIdx('docentes',       'usuario_1'),
+        dropIdx('estudiantes',    'usuario_1'),
+        dropIdx('administradors', 'usuario_1'),
+        dropIdx('horariotutors',  'tutor_1'),
+        dropIdx('horariotutors',  'materia_1'),
+    ]);
+
+    let creados = 0, docentesCreados = 0, estudiantesCreados = 0, adminsCreados = 0;
     for (const u of [...ADMINS, ...TUTORES, ...ESTUDIANTES]) {
         const { codigo, ...datosUsuario } = u;
         const usuarioDoc = await Usuario.create(datosUsuario);
@@ -340,7 +355,6 @@ async function seed() {
 
         if (u.rol === 'tutor') {
             await Docente.create({
-                usuario:      usuarioDoc._id,
                 nombre:       usuarioDoc.nombre,
                 correo:       usuarioDoc.correo,
                 departamento: 'Ingeniería de Sistemas',
@@ -348,22 +362,27 @@ async function seed() {
             docentesCreados++;
         } else if (u.rol === 'estudiante') {
             await Estudiante.create({
-                usuario: usuarioDoc._id,
-                nombre:  usuarioDoc.nombre,
-                correo:  usuarioDoc.correo,
-                codigo:  codigo,
+                nombre: usuarioDoc.nombre,
+                correo: usuarioDoc.correo,
+                codigo: codigo,
             });
             estudiantesCreados++;
+        } else if (u.rol === 'admin') {
+            await Administrador.create({
+                nombre: usuarioDoc.nombre,
+                correo: usuarioDoc.correo,
+            });
+            adminsCreados++;
         }
     }
-    console.log(`   Total: ${creados} usuarios (${docentesCreados} docentes, ${estudiantesCreados} estudiantes)`);
+    console.log(`   Total: ${creados} usuarios (${adminsCreados} admins, ${docentesCreados} docentes, ${estudiantesCreados} estudiantes)`);
 
     /* ── 4. Crear catálogo con ObjectId reales ── */
     console.log('\n📚 Creando catálogo...');
     const tutorCache = new Map();
     const getTutor   = async (nombre) => {
         if (!tutorCache.has(nombre)) {
-            const doc = await Usuario.findOne({ nombre, rol: 'tutor' }).select('_id nombre');
+            const doc = await Usuario.findOne({ nombre, rol: 'tutor' }).select('_id nombre correo');
             tutorCache.set(nombre, doc);
         }
         return tutorCache.get(nombre);
@@ -379,8 +398,8 @@ async function seed() {
                 const tutorDoc = await getTutor(h.tutor);
                 if (!tutorDoc) { omitidos++; continue; }
                 await HorarioTutor.create({
-                    tutor:   tutorDoc._id,
-                    materia: materia._id,
+                    tutor:   { id: tutorDoc._id.toString(), nombre: tutorDoc.nombre, correo: tutorDoc.correo ?? '' },
+                    materia: { id: materia._id.toString(),  nombre: materia.nombre,  semestre: materia.semestre },
                     horario: h.horario,
                     aula:    h.aula,
                 });
@@ -393,6 +412,7 @@ async function seed() {
     console.log('\n════════════════════════════════════');
     console.log('🎉 Base de datos lista:');
     console.log(`   👥 usuarios:      ${creados}`);
+    console.log(`   🔐 admins:        ${adminsCreados}`);
     console.log(`   🧑‍🏫 docentes:      ${docentesCreados}`);
     console.log(`   🎓 estudiantes:   ${estudiantesCreados}`);
     console.log(`   📖 materias:      ${totalMaterias}`);

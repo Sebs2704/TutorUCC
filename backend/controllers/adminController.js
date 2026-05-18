@@ -3,12 +3,13 @@ const mongoose   = require('mongoose');
 // Escapa caracteres especiales de regex para evitar ReDoS con input de usuario
 const _esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const Usuario    = require('../models/Usuario');
-const Docente    = require('../models/Docente');
-const Estudiante = require('../models/Estudiante');
-const Materia    = require('../models/Materia');
-const HorarioTutor = require('../models/HorarioTutor');
-const Tutoria    = require('../models/Tutoria');
+const Usuario       = require('../models/Usuario');
+const Docente       = require('../models/Docente');
+const Estudiante    = require('../models/Estudiante');
+const Administrador = require('../models/Administrador');
+const Materia       = require('../models/Materia');
+const HorarioTutor  = require('../models/HorarioTutor');
+const Tutoria       = require('../models/Tutoria');
 
 /* ──────────────────── STATS ──────────────────── */
 const getStats = async (req, res) => {
@@ -39,7 +40,6 @@ const getEstudiantes = async (req, res) => {
         if (nombre) filtro.nombre = { $regex: _esc(nombre), $options: 'i' };
         if (codigo) filtro.codigo = { $regex: _esc(codigo), $options: 'i' };
         const estudiantes = await Estudiante.find(filtro)
-            .populate('usuario', 'activo')
             .sort({ nombre: 1 })
             .lean();
         res.json({ estudiantes });
@@ -65,9 +65,8 @@ const crearEstudiante = async (req, res) => {
 
         const usuarioDoc    = await Usuario.create({ nombre, correo, password, rol: 'estudiante' });
         const estudianteDoc = await Estudiante.create({
-            usuario: usuarioDoc._id,
-            nombre:  usuarioDoc.nombre,
-            correo:  usuarioDoc.correo,
+            nombre: usuarioDoc.nombre,
+            correo: usuarioDoc.correo,
             codigo,
         });
         res.status(201).json({ mensaje: 'Estudiante creado correctamente', estudiante: estudianteDoc });
@@ -96,7 +95,7 @@ const actualizarEstudiante = async (req, res) => {
             if (existeCodigo) return res.status(400).json({ mensaje: 'Ese código ya está en uso' });
         }
 
-        const usuarioDoc = await Usuario.findById(estudianteDoc.usuario).select('+password');
+        const usuarioDoc = await Usuario.findOne({ correo: estudianteDoc.correo }).select('+password');
         if (!usuarioDoc) return res.status(404).json({ mensaje: 'Usuario asociado no encontrado' });
 
         if (nombre)   { usuarioDoc.nombre  = nombre;  estudianteDoc.nombre  = nombre; }
@@ -123,17 +122,20 @@ const eliminarEstudiante = async (req, res) => {
         const estudianteDoc = await Estudiante.findById(req.params.id);
         if (!estudianteDoc) return res.status(404).json({ mensaje: 'Estudiante no encontrado' });
 
+        const usuarioDoc = await Usuario.findOne({ correo: estudianteDoc.correo });
+        const uid = usuarioDoc?._id.toString() ?? '';
+
         const tutoriasActivas = await Tutoria.countDocuments({
-            estudiante: estudianteDoc.usuario,
+            estudiante: uid,
             estado: { $in: ['pendiente', 'confirmada'] },
         });
         if (tutoriasActivas > 0) {
             return res.status(400).json({ mensaje: 'No se puede eliminar: el estudiante tiene tutorías activas' });
         }
 
-        await Tutoria.deleteMany({ estudiante: estudianteDoc.usuario });
+        await Tutoria.deleteMany({ estudiante: uid });
         await Estudiante.findByIdAndDelete(estudianteDoc._id);
-        await Usuario.findByIdAndDelete(estudianteDoc.usuario);
+        if (usuarioDoc) await Usuario.findByIdAndDelete(usuarioDoc._id);
 
         res.json({ mensaje: 'Estudiante eliminado correctamente' });
     } catch (error) {
@@ -149,7 +151,6 @@ const getDocentes = async (req, res) => {
         const filtro = {};
         if (nombre) filtro.nombre = { $regex: _esc(nombre), $options: 'i' };
         const docentes = await Docente.find(filtro)
-            .populate('usuario', 'activo')
             .sort({ nombre: 1 })
             .lean();
         res.json({ docentes });
@@ -170,7 +171,6 @@ const crearDocente = async (req, res) => {
 
         const usuarioDoc = await Usuario.create({ nombre, correo, password, rol: 'tutor' });
         const docenteDoc = await Docente.create({
-            usuario:      usuarioDoc._id,
             nombre:       usuarioDoc.nombre,
             correo:       usuarioDoc.correo,
             departamento: departamento || 'Ingeniería de Sistemas',
@@ -192,7 +192,7 @@ const actualizarDocente = async (req, res) => {
         if (!docenteDoc) return res.status(404).json({ mensaje: 'Docente no encontrado' });
 
         const { nombre, correo, departamento, password } = req.body;
-        const usuarioDoc = await Usuario.findById(docenteDoc.usuario).select('+password');
+        const usuarioDoc = await Usuario.findOne({ correo: docenteDoc.correo }).select('+password');
         if (!usuarioDoc) return res.status(404).json({ mensaje: 'Usuario asociado no encontrado' });
 
         if (nombre)       { usuarioDoc.nombre  = nombre;       docenteDoc.nombre  = nombre; }
@@ -219,18 +219,21 @@ const eliminarDocente = async (req, res) => {
         const docenteDoc = await Docente.findById(req.params.id);
         if (!docenteDoc) return res.status(404).json({ mensaje: 'Docente no encontrado' });
 
+        const usuarioDoc = await Usuario.findOne({ correo: docenteDoc.correo });
+        const uid = usuarioDoc?._id.toString() ?? '';
+
         const tutoriasActivas = await Tutoria.countDocuments({
-            tutor:  docenteDoc.usuario,
+            tutor:  uid,
             estado: { $in: ['pendiente', 'confirmada'] },
         });
         if (tutoriasActivas > 0) {
             return res.status(400).json({ mensaje: 'No se puede eliminar: el docente tiene tutorías activas' });
         }
 
-        await HorarioTutor.deleteMany({ tutor: docenteDoc.usuario });
-        await Tutoria.deleteMany({ tutor: docenteDoc.usuario });
+        await HorarioTutor.deleteMany({ 'tutor.id': uid });
+        await Tutoria.deleteMany({ tutor: uid });
         await Docente.findByIdAndDelete(docenteDoc._id);
-        await Usuario.findByIdAndDelete(docenteDoc.usuario);
+        if (usuarioDoc) await Usuario.findByIdAndDelete(usuarioDoc._id);
 
         res.json({ mensaje: 'Docente eliminado correctamente' });
     } catch (error) {
@@ -317,26 +320,17 @@ const getHorarios = async (req, res) => {
         let matchIds = null;
 
         if (buscar) {
-            // Resuelve IDs en MongoDB antes de consultar horariotutors
             const rx = { $regex: _esc(buscar), $options: 'i' };
-            const [materias, tutores] = await Promise.all([
-                Materia.find({ nombre: rx }).select('_id').lean(),
-                Usuario.find({ nombre: rx, rol: 'tutor' }).select('_id').lean(),
-            ]);
             matchIds = {
                 $or: [
-                    { materia: { $in: materias.map(m => m._id) } },
-                    { tutor:   { $in: tutores.map(t => t._id)  } },
+                    { 'materia.nombre': rx },
+                    { 'tutor.nombre':   rx },
                 ],
             };
         }
 
-        const horarios = await HorarioTutor.find(matchIds || {})
-            .populate('tutor',   'nombre correo')
-            .populate('materia', 'nombre semestre')
-            .lean();
+        const horarios = await HorarioTutor.find(matchIds || {}).lean();
 
-        // Ordenar por semestre en JS (populate impide sort de Mongo sobre campos joined)
         horarios.sort((a, b) => {
             const si = ORDEN_SEM.indexOf(a.materia?.semestre);
             const bi = ORDEN_SEM.indexOf(b.materia?.semestre);
@@ -356,9 +350,16 @@ const crearHorario = async (req, res) => {
         if (!tutorId || !materiaId || !horario || !aula) {
             return res.status(400).json({ mensaje: 'Docente, materia, horario y aula son obligatorios' });
         }
+        const [tutorDoc, materiaDoc] = await Promise.all([
+            Usuario.findById(tutorId).select('nombre correo'),
+            Materia.findById(materiaId).select('nombre semestre'),
+        ]);
+        if (!tutorDoc)   return res.status(404).json({ mensaje: 'Tutor no encontrado' });
+        if (!materiaDoc) return res.status(404).json({ mensaje: 'Materia no encontrada' });
+
         const horarioDoc = await HorarioTutor.create({
-            tutor:   tutorId,
-            materia: materiaId,
+            tutor:   { id: tutorDoc._id.toString(), nombre: tutorDoc.nombre, correo: tutorDoc.correo },
+            materia: { id: materiaDoc._id.toString(), nombre: materiaDoc.nombre, semestre: materiaDoc.semestre },
             horario,
             aula,
         });
@@ -406,18 +407,13 @@ const getTutorias = async (req, res) => {
 
         if (buscar) {
             const rx = { $regex: _esc(buscar), $options: 'i' };
-            // nombreEstudiante está desnormalizado como string — se busca directo
-            // materia requiere pre-lookup de IDs
-            const materias = await Materia.find({ nombre: rx }).select('_id').lean();
             filtro.$or = [
                 { nombreEstudiante: rx },
-                { materia: { $in: materias.map(m => m._id) } },
+                { nombreMateria:    rx },
             ];
         }
 
         const tutorias = await Tutoria.find(filtro)
-            .populate('tutor',   'nombre')
-            .populate('materia', 'nombre semestre')
             .sort({ creadoEn: -1 })
             .lean();
         res.json({ tutorias });
@@ -438,10 +434,98 @@ const eliminarTutoria = async (req, res) => {
     }
 };
 
+/* ──────────────────── ADMINISTRADORES ──────────────────── */
+const getAdmins = async (req, res) => {
+    try {
+        const { nombre } = req.query;
+        const filtro = {};
+        if (nombre) filtro.nombre = { $regex: _esc(nombre), $options: 'i' };
+        const admins = await Administrador.find(filtro)
+            .sort({ nombre: 1 })
+            .lean();
+        res.json({ admins });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+};
+
+const crearAdmin = async (req, res) => {
+    try {
+        const { nombre, correo, password } = req.body;
+        if (!nombre || !correo || !password)
+            return res.status(400).json({ mensaje: 'Nombre, correo y contraseña son obligatorios' });
+
+        const existe = await Usuario.findOne({ correo });
+        if (existe) return res.status(400).json({ mensaje: 'Ya existe un usuario con ese correo' });
+
+        const usuarioDoc = await Usuario.create({ nombre, correo, password, rol: 'admin' });
+        const adminDoc   = await Administrador.create({
+            nombre: usuarioDoc.nombre,
+            correo: usuarioDoc.correo,
+        });
+        res.status(201).json({ mensaje: 'Administrador creado correctamente', admin: adminDoc });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const msgs = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ mensaje: msgs.join(', ') });
+        }
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+};
+
+const actualizarAdmin = async (req, res) => {
+    try {
+        const adminDoc = await Administrador.findById(req.params.id);
+        if (!adminDoc) return res.status(404).json({ mensaje: 'Administrador no encontrado' });
+
+        const { nombre, correo, password } = req.body;
+        const usuarioDoc = await Usuario.findOne({ correo: adminDoc.correo }).select('+password');
+        if (!usuarioDoc) return res.status(404).json({ mensaje: 'Usuario asociado no encontrado' });
+
+        if (nombre)   { usuarioDoc.nombre = nombre; adminDoc.nombre = nombre; }
+        if (correo)   { usuarioDoc.correo = correo; adminDoc.correo = correo; }
+        if (password) { usuarioDoc.password = password; }
+
+        await usuarioDoc.save();
+        await adminDoc.save();
+
+        res.json({ mensaje: 'Administrador actualizado correctamente', admin: adminDoc });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const msgs = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ mensaje: msgs.join(', ') });
+        }
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+};
+
+const eliminarAdmin = async (req, res) => {
+    try {
+        const adminDoc = await Administrador.findById(req.params.id);
+        if (!adminDoc) return res.status(404).json({ mensaje: 'Administrador no encontrado' });
+
+        const usuarioDoc = await Usuario.findOne({ correo: adminDoc.correo });
+        if (usuarioDoc && usuarioDoc._id.toString() === req.usuarioId.toString())
+            return res.status(400).json({ mensaje: 'No puedes eliminar tu propio usuario administrador' });
+
+        await Administrador.findByIdAndDelete(adminDoc._id);
+        if (usuarioDoc) await Usuario.findByIdAndDelete(usuarioDoc._id);
+
+        res.json({ mensaje: 'Administrador eliminado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+};
+
 module.exports = {
     getStats,
     getEstudiantes, crearEstudiante, actualizarEstudiante, eliminarEstudiante,
     getDocentes,    crearDocente,    actualizarDocente,    eliminarDocente,
+    getAdmins,      crearAdmin,      actualizarAdmin,      eliminarAdmin,
     getMaterias,    crearMateria,    actualizarMateria,    eliminarMateria,
     getHorarios,    crearHorario,    actualizarHorario,    eliminarHorario,
     getTutorias,    eliminarTutoria,

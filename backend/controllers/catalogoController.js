@@ -35,11 +35,11 @@ const getMaterias = async (req, res) => {
 const getTutores = async (req, res) => {
     try {
         const horarios = await HorarioTutor
-            .find({ materia: req.params.id, activo: true })
-            .populate('tutor', 'nombre');   // join a usuarios
+            .find({ 'materia.id': req.params.id, activo: true })
+            .lean();
 
         const tutores = horarios.map(h => ({
-            tutorId:        h.tutor._id,
+            tutorId:        h.tutor.id,
             horarioTutorId: h._id,
             nombre:         h.tutor.nombre,
             horario:        h.horario,

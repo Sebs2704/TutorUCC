@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const DocenteSchema = new mongoose.Schema({
+const AdministradorSchema = new mongoose.Schema({
     nombre: {
         type:     String,
         required: true,
@@ -13,11 +13,6 @@ const DocenteSchema = new mongoose.Schema({
         lowercase: true,
         trim:      true,
     },
-    departamento: {
-        type:    String,
-        default: 'Ingeniería de Sistemas',
-        trim:    true,
-    },
     activo: {
         type:    Boolean,
         default: true,
@@ -28,4 +23,4 @@ const DocenteSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Docente', DocenteSchema);
+module.exports = mongoose.model('Administrador', AdministradorSchema);

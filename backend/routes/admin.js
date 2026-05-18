@@ -36,4 +36,10 @@ router.delete('/horarios/:id',  ctrl.eliminarHorario);
 router.get   ('/tutorias',      ctrl.getTutorias);
 router.delete('/tutorias/:id',  ctrl.eliminarTutoria);
 
+// Administradores
+router.get   ('/admins',      ctrl.getAdmins);
+router.post  ('/admins',      ctrl.crearAdmin);
+router.put   ('/admins/:id',  ctrl.actualizarAdmin);
+router.delete('/admins/:id',  ctrl.eliminarAdmin);
+
 module.exports = router;
