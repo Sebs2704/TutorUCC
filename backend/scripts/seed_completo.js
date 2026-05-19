@@ -48,6 +48,28 @@ const TUTORES = [
     { nombre: 'Yomaira Guzman Paredes',         correo: 'guzmanpy@campusucc.edu.co',     password: 'Tutoria2026', rol: 'tutor' },
 ];
 
+// Monitores: son estudiantes que también prestan servicio como tutores.
+// Se crea un Usuario con rol='tutor' (para que puedan gestionar tutorías)
+// y además un documento Estudiante (para que figuren en el registro estudiantil).
+const MONITORES = [
+    {
+        nombre:   'Javier Esneider Nieto Bello',
+        correo:   'javier.nietob@campusucc.edu.co',
+        password: 'Monitor2026',
+        rol:      'tutor',
+        codigo:   '200001',   // código estudiantil del monitor
+        celular:  '3177053998',
+    },
+    {
+        nombre:   'Jhilmer Alejandro Cala Celis',
+        correo:   'jhilmer.cala@campusucc.edu.co',
+        password: 'Monitor2026',
+        rol:      'tutor',
+        codigo:   '200002',
+        celular:  '3204103866',
+    },
+];
+
 // Formato: nombre, correo institucional, contraseña inicial, código UCC (6 dígitos)
 // ⚠ Actualiza los correos y códigos con los datos reales de UCC antes de correr en producción
 const ESTUDIANTES = [
@@ -80,6 +102,22 @@ const ESTUDIANTES = [
 /* ═══════════════════════════════════════════════════════════════
    DATOS: CATÁLOGO
 ═══════════════════════════════════════════════════════════════ */
+const JAVIER = [
+  { horario: 'Lunes 12:00-17:00',     aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+  { horario: 'Martes 12:00-17:00',    aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+  { horario: 'Miércoles 8:00-10:00',  aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+  { horario: 'Miércoles 14:00-17:00', aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+  { horario: 'Jueves 12:00-17:00',    aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+  { horario: 'Viernes 8:00-12:00',    aula: '309', tutor: 'Javier Esneider Nieto Bello' },
+];
+const JHILMER = [
+  { horario: 'Lunes 13:00-17:00',     aula: '309', tutor: 'Jhilmer Alejandro Cala Celis' },
+  { horario: 'Martes 13:00-17:00',    aula: '309', tutor: 'Jhilmer Alejandro Cala Celis' },
+  { horario: 'Miércoles 9:00-11:00',  aula: '309', tutor: 'Jhilmer Alejandro Cala Celis' },
+  { horario: 'Miércoles 13:00-17:00', aula: '309', tutor: 'Jhilmer Alejandro Cala Celis' },
+  { horario: 'Jueves 13:00-17:00',    aula: '309', tutor: 'Jhilmer Alejandro Cala Celis' },
+];
+
 const CATALOGO = {
   'I': [
     { nombre: 'Cálculo Diferencial', tutores: [
@@ -89,12 +127,14 @@ const CATALOGO = {
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Lunes 16:00-19:00',     aula: '210' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 15:00-16:00',   aula: '207' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 18:00-19:00',   aula: '206' },
+      ...JAVIER,
     ]},
     { nombre: 'Lógica Matemática', tutores: [
       { tutor: 'Lina Maria Zabala Arango',         horario: 'Martes 16:00-18:00',    aula: '207' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Lunes 16:00-19:00',     aula: '210' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 15:00-16:00',   aula: '207' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 18:00-19:00',   aula: '206' },
+      ...JAVIER,
     ]},
     { nombre: 'Algoritmia', tutores: [
       { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
@@ -102,10 +142,15 @@ const CATALOGO = {
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 13:00-14:00', aula: '206' },
+      ...JAVIER,
+      ...JHILMER,
     ]},
     { nombre: 'Contexto de la Ing. de Sistemas', tutores: [] },
   ],
   'II': [
+    { nombre: 'Análisis de Sistemas', tutores: [
+      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
+    ]},
     { nombre: 'Cálculo Integral', tutores: [
       { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
       { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
@@ -120,15 +165,16 @@ const CATALOGO = {
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Lunes 16:00-19:00',     aula: '210' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 15:00-16:00',   aula: '207' },
       { tutor: 'Lina Shirley Lopez Hernandez',     horario: 'Viernes 18:00-19:00',   aula: '206' },
-    ]},
-    { nombre: 'Análisis de Sistemas', tutores: [
-      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
+      ...JAVIER,
     ]},
     { nombre: 'Téc. de Medición de Variables Físicas', tutores: [
       { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
       { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
       { tutor: 'Lina Maria Zabala Arango',         horario: 'Martes 16:00-18:00',    aula: '207' },
       { tutor: 'Myriam Cristina Reyes Ortiz',      horario: 'Lunes 10:00-12:00',     aula: '213' },
+    ]},
+    { nombre: 'Herramientas Computacionales', tutores: [
+      ...JAVIER,
     ]},
   ],
   'III': [
@@ -152,111 +198,133 @@ const CATALOGO = {
     { nombre: 'Estructuras de Datos', tutores: [
       { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
     ]},
+  ],
+  'IV': [
+    { nombre: 'Estadística Inferencial', tutores: [
+      { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
+      { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
+      { tutor: 'Ana Milena Gutierrez Cardenas',    horario: 'Lunes 7:00-12:00',      aula: '207' },
+    ]},
+    { nombre: 'Arquitectura de Computadores', tutores: [] },
     { nombre: 'Programación Orientada a Objetos', tutores: [
       { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
       { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
       { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
       { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
       { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
+      ...JAVIER,
+      ...JHILMER,
     ]},
-  ],
-  'IV': [
     { nombre: 'Ecuaciones Diferenciales', tutores: [
       { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
       { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
       { tutor: 'Lina Maria Zabala Arango',         horario: 'Martes 16:00-18:00',    aula: '207' },
       { tutor: 'Ana Milena Gutierrez Cardenas',    horario: 'Lunes 7:00-12:00',      aula: '207' },
     ]},
-    { nombre: 'Estadística Inferencial', tutores: [
-      { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
-      { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
-      { tutor: 'Ana Milena Gutierrez Cardenas',    horario: 'Lunes 7:00-12:00',      aula: '207' },
-    ]},
-    { nombre: 'Diseño Orientado a Objetos', tutores: [
-      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
-      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
-    ]},
-    { nombre: 'Arquitectura de Computadores', tutores: [] },
-    { nombre: 'Sistemas Operativos', tutores: [
-      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
-    ]},
+  ],
+  'V': [
     { nombre: 'Propagación de Señales y Ondas', tutores: [
       { tutor: 'Lina Maria Zabala Arango',         horario: 'Martes 16:00-18:00',    aula: '207' },
     ]},
-  ],
-  'V': [
-    { nombre: 'Matemáticas Especiales', tutores: [
-      { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
-      { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
-    ]},
-    { nombre: 'Análisis Numérico', tutores: [] },
-    { nombre: 'Patrones de Diseño Orientado a Objetos', tutores: [
-      { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
-    ]},
-    { nombre: 'Interconexión de Redes de Comp.', tutores: [] },
     { nombre: 'Diseño de Bases de Datos', tutores: [
       { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 13:00-14:00', aula: '206' },
+      ...JAVIER,
+    ]},
+    { nombre: 'Sistemas Operativos', tutores: [
+      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
+    ]},
+    { nombre: 'Diseño Orientado a Objetos', tutores: [
+      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
+      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
+    ]},
+    { nombre: 'Análisis Numérico', tutores: [] },
+    { nombre: 'Matemáticas Especiales', tutores: [
+      { tutor: 'Daniel Bejarano Segura',           horario: 'Martes 18:00-19:00',    aula: '210' },
+      { tutor: 'Daniel Bejarano Segura',           horario: 'Jueves 18:00-19:00',    aula: '210' },
+    ]},
+  ],
+  'VI': [
+    { nombre: 'Sistemas Distribuidos', tutores: [] },
+    { nombre: 'Creación de Bases de Datos', tutores: [
+      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
+      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
+      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
+      ...JAVIER,
+    ]},
+    { nombre: 'Interconexión de Redes de Comp.', tutores: [
+      ...JAVIER,
+    ]},
+    { nombre: 'Patrones de Diseño Orientado a Objetos', tutores: [
+      { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
     ]},
     { nombre: 'Física, Electricidad y Magnetismo', tutores: [
       { tutor: 'Lina Maria Zabala Arango',         horario: 'Martes 16:00-18:00',    aula: '207' },
       { tutor: 'Myriam Cristina Reyes Ortiz',      horario: 'Lunes 10:00-12:00',     aula: '213' },
     ]},
-  ],
-  'VI': [
     { nombre: 'Asp. Administrativos y Económicos', tutores: [] },
-    { nombre: 'Ing. del Software y Requerimientos', tutores: [
-      { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
-    ]},
-    { nombre: 'Creación de Bases de Datos', tutores: [
-      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
-      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
-      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
-    ]},
-    { nombre: 'Sistemas Distribuidos', tutores: [] },
-    { nombre: 'Diseño de Modelos de Seguridad', tutores: [
-      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
-    ]},
+  ],
+  'VII': [
     { nombre: 'Aplicaciones de la Inteligencia Artificial', tutores: [
       { tutor: 'Yomaira Guzman Paredes',           horario: 'Jueves 14:00-17:00',    aula: '208' },
     ]},
-  ],
-  'VII': [
-    { nombre: 'Ingeniería Económica', tutores: [
-      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
+    { nombre: 'Electiva Específica I', tutores: [
+      { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
+      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
     ]},
     { nombre: 'Gestión de Bases de Datos', tutores: [
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 13:00-14:00', aula: '206' },
+      ...JAVIER,
+    ]},
+    { nombre: 'Diseño de Modelos de Seguridad', tutores: [
+      { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
+    ]},
+    { nombre: 'Ing. del Software y Requerimientos', tutores: [
+      { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
+    ]},
+    { nombre: 'Ingeniería Económica', tutores: [
+      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
+    ]},
+    { nombre: 'Asp. Contables para la Gestión de Proy.', tutores: [
+      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
+    ]},
+  ],
+  'VIII': [
+    { nombre: 'Form. y Evaluación de Proyectos', tutores: [
+      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
     ]},
     { nombre: 'Gestión de Seguridad Inf.', tutores: [
       { tutor: 'Carlos Ignacio Torres Londoño',    horario: 'Lunes 14:00-16:00',     aula: '208' },
       { tutor: 'Yomaira Guzman Paredes',           horario: 'Jueves 14:00-17:00',    aula: '208' },
     ]},
-    { nombre: 'Met. Inv. Aplic. a la Mod. Grado', tutores: [] },
     { nombre: 'Minería de Datos', tutores: [
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
       { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 13:00-14:00', aula: '206' },
     ]},
+    { nombre: 'Electiva Específica II', tutores: [
+      { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
+      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
+    ]},
+    { nombre: 'Met. Inv. Aplic. a la Mod. Grado', tutores: [] },
     { nombre: 'Téc. de Validación y Simulación', tutores: [
       { tutor: 'Piedad Chica Sosa',                horario: 'Viernes 16:00-18:00',   aula: '110' },
       { tutor: 'Yomaira Guzman Paredes',           horario: 'Jueves 14:00-17:00',    aula: '208' },
       { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
     ]},
   ],
-  'VIII': [
-    { nombre: 'Asp. Contables para la Gestión de Proy.', tutores: [
-      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
+  'IX': [
+    { nombre: 'Electiva Específica III', tutores: [
+      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
     ]},
-    { nombre: 'Form. y Evaluación de Proyectos', tutores: [
-      { tutor: 'Luis Eduardo Rey Huertas',         horario: 'Martes 16:00-18:00',    aula: '210' },
-    ]},
-    { nombre: 'Arq. y Modelamiento de Software', tutores: [
+    { nombre: 'Gerencia de Proyectos', tutores: [
       { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
+      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
+      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
     ]},
     { nombre: 'Diseño de Interfaces', tutores: [
       { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
@@ -264,39 +332,24 @@ const CATALOGO = {
     { nombre: 'Dllo. de Sist. Inf. y Multimediales', tutores: [
       { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
     ]},
-    { nombre: 'Electiva Específica I', tutores: [
-      { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
+    { nombre: 'Arq. y Modelamiento de Software', tutores: [
+      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
+    ]},
+    { nombre: 'Construcción del Trabajo de Grado', tutores: [] },
+  ],
+  'X': [
+    { nombre: 'Electiva Específica IV', tutores: [
       { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
     ]},
-  ],
-  'IX': [
-    { nombre: 'Construcción del Trabajo de Grado', tutores: [] },
-    { nombre: 'Gerencia de Proyectos', tutores: [
-      { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
-      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Lunes 17:00-18:00',     aula: '206' },
-      { tutor: 'Mayra Alexandra Amador Ladino',    horario: 'Miércoles 7:00-10:00',  aula: '207' },
-    ]},
+    { nombre: 'Práctica Emp. Aplic. al Trabajo de Grado', tutores: [] },
+    { nombre: 'Aspectos Generales del Medio Ambiente',    tutores: [] },
     { nombre: 'Gestión y Calidad del Software', tutores: [
       { tutor: 'Francy Yaneth Patiño Martinez',    horario: 'Jueves 17:00-18:00',    aula: '208' },
     ]},
     { nombre: 'Auditoria de Sistemas', tutores: [
       { tutor: 'Yomaira Guzman Paredes',           horario: 'Jueves 14:00-17:00',    aula: '208' },
     ]},
-    { nombre: 'Electiva Específica II', tutores: [
-      { tutor: 'Lina Marcela Cespedes Garcia',     horario: 'Viernes 16:00-18:00',   aula: '208' },
-      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
-    ]},
-  ],
-  'X': [
-    { nombre: 'Práctica Emp. Aplic. al Trabajo de Grado', tutores: [] },
-    { nombre: 'Aspectos Generales del Medio Ambiente',    tutores: [] },
     { nombre: 'Ley y Ética para Ingeniería',              tutores: [] },
-    { nombre: 'Electiva Específica III', tutores: [
-      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
-    ]},
-    { nombre: 'Electiva Específica IV', tutores: [
-      { tutor: 'Pedro Fernando Osorio Tejada',     horario: 'Viernes 16:00-18:00',   aula: '206' },
-    ]},
   ],
 };
 
@@ -346,7 +399,7 @@ async function seed() {
         dropIdx('horariotutors',  'materia_1'),
     ]);
 
-    let creados = 0, docentesCreados = 0, estudiantesCreados = 0, adminsCreados = 0;
+    let creados = 0, docentesCreados = 0, estudiantesCreados = 0, adminsCreados = 0, monitoresCreados = 0;
     for (const u of [...ADMINS, ...TUTORES, ...ESTUDIANTES]) {
         const { codigo, ...datosUsuario } = u;
         const usuarioDoc = await Usuario.create(datosUsuario);
@@ -375,7 +428,29 @@ async function seed() {
             adminsCreados++;
         }
     }
-    console.log(`   Total: ${creados} usuarios (${adminsCreados} admins, ${docentesCreados} docentes, ${estudiantesCreados} estudiantes)`);
+
+    // Monitores: acceden como tutores pero también figuran en el registro estudiantil
+    for (const m of MONITORES) {
+        const { codigo, celular, ...datosUsuario } = m;
+        const usuarioDoc = await Usuario.create(datosUsuario);
+        await Docente.create({
+            nombre:       usuarioDoc.nombre,
+            correo:       usuarioDoc.correo,
+            departamento: 'Ingeniería de Sistemas',
+        });
+        await Estudiante.create({
+            nombre: usuarioDoc.nombre,
+            correo: usuarioDoc.correo,
+            codigo: codigo,
+        });
+        console.log(`   ✅ monitor     ${m.nombre} (tutor + estudiante)`);
+        creados++;
+        docentesCreados++;
+        estudiantesCreados++;
+        monitoresCreados++;
+    }
+
+    console.log(`   Total: ${creados} usuarios (${adminsCreados} admins, ${docentesCreados} docentes, ${estudiantesCreados} estudiantes, ${monitoresCreados} monitores)`);
 
     /* ── 4. Crear catálogo con ObjectId reales ── */
     console.log('\n📚 Creando catálogo...');
@@ -423,9 +498,10 @@ async function seed() {
     console.log('════════════════════════════════════\n');
 
     console.log('📌 Credenciales de acceso:');
-    console.log('   Admin       → admin.ti@campusucc.edu.co   /  Admin2026!');
-    console.log('   Tutores     → contraseña: Tutoria2026     (ej: torresc@campusucc.edu.co)');
-    console.log('   Estudiantes → contraseña: Estudio2026     (ej: agudelomj@campusucc.edu.co)');
+    console.log('   Admin       → admin.ti@campusucc.edu.co         /  Admin2026!');
+    console.log('   Tutores     → contraseña: Tutoria2026            (ej: torresc@campusucc.edu.co)');
+    console.log('   Estudiantes → contraseña: Estudio2026            (ej: agudelomj@campusucc.edu.co)');
+    console.log('   Monitores   → contraseña: Monitor2026            (ej: javier.nietob@campusucc.edu.co)');
 
     await mongoose.disconnect();
 }

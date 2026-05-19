@@ -31,6 +31,14 @@ const TUTORES = [
     { nombre: 'Yomaira Guzman Paredes',         correo: 'guzmanpy@campusucc.edu.co'  },
 ];
 
+// Monitores: estudiantes que también dan tutorías.
+// Se crean con rol 'tutor' para acceso al dashboard de tutores
+// y adicionalmente se registran en la colección de estudiantes.
+const MONITORES = [
+    { nombre: 'Javier Esneider Nieto Bello',  correo: 'javier.nietob@campusucc.edu.co', codigo: '200001' },
+    { nombre: 'Jhilmer Alejandro Cala Celis', correo: 'jhilmer.cala@campusucc.edu.co',  codigo: '200002' },
+];
+
 const ESTUDIANTES_PRUEBA = [
     { nombre: 'Estudiante Prueba Uno',  correo: 'estudiante1@campusucc.edu.co', codigo: '100001' },
     { nombre: 'Estudiante Prueba Dos',  correo: 'estudiante2@campusucc.edu.co', codigo: '100002' },
@@ -69,6 +77,21 @@ async function seed() {
         await Usuario.create({ ...e, password: 'Estudio2026', rol: 'estudiante' });
         await Estudiante.create({ nombre: e.nombre, correo: e.correo, codigo: e.codigo });
         console.log(`  ✅ Estudiante creado: ${e.nombre} → ${e.correo}`);
+        creados++;
+    }
+
+    // ── Monitores → usuario (rol tutor) + docente + estudiante ───
+    for (const m of MONITORES) {
+        const existe = await Usuario.findOne({ correo: m.correo });
+        if (existe) {
+            console.log(`  ⚠  Omitido (ya existe): ${m.correo}`);
+            omitidos++;
+            continue;
+        }
+        await Usuario.create({ nombre: m.nombre, correo: m.correo, password: 'Monitor2026', rol: 'tutor' });
+        await Docente.create({ nombre: m.nombre, correo: m.correo });
+        await Estudiante.create({ nombre: m.nombre, correo: m.correo, codigo: m.codigo });
+        console.log(`  ✅ Monitor creado: ${m.nombre} → ${m.correo} (tutor + estudiante)`);
         creados++;
     }
 
