@@ -53,20 +53,22 @@ const TUTORES = [
 // y además un documento Estudiante (para que figuren en el registro estudiantil).
 const MONITORES = [
     {
-        nombre:   'Javier Esneider Nieto Bello',
-        correo:   'javier.nietob@campusucc.edu.co',
-        password: 'Monitor2026',
-        rol:      'tutor',
-        codigo:   '200001',   // código estudiantil del monitor
-        celular:  '3177053998',
+        nombre:          'Javier Esneider Nieto Bello',
+        correo:          'javier.nietob@campusucc.edu.co',   // login tutor
+        correoEstudiante:'javier.nieto.est@campusucc.edu.co', // login estudiante
+        password:        'Monitor2026',
+        rol:             'tutor',
+        codigo:          '200001',
+        celular:         '3177053998',
     },
     {
-        nombre:   'Jhilmer Alejandro Cala Celis',
-        correo:   'jhilmer.cala@campusucc.edu.co',
-        password: 'Monitor2026',
-        rol:      'tutor',
-        codigo:   '200002',
-        celular:  '3204103866',
+        nombre:          'Jhilmer Alejandro Cala Celis',
+        correo:          'jhilmer.cala@campusucc.edu.co',    // login tutor
+        correoEstudiante:'jhilmer.cala.est@campusucc.edu.co', // login estudiante
+        password:        'Monitor2026',
+        rol:             'tutor',
+        codigo:          '200002',
+        celular:         '3204103866',
     },
 ];
 
@@ -429,22 +431,25 @@ async function seed() {
         }
     }
 
-    // Monitores: acceden como tutores pero también figuran en el registro estudiantil
+    // Monitores: cuenta de tutor para gestionar tutorías + cuenta de estudiante para pedirlas
     for (const m of MONITORES) {
-        const { codigo, celular, ...datosUsuario } = m;
-        const usuarioDoc = await Usuario.create(datosUsuario);
+        const { codigo, celular, correoEstudiante, ...datosUsuario } = m;
+
+        // Cuenta tutor
+        const tutorDoc = await Usuario.create(datosUsuario);
         await Docente.create({
-            nombre:       usuarioDoc.nombre,
-            correo:       usuarioDoc.correo,
+            nombre:       tutorDoc.nombre,
+            correo:       tutorDoc.correo,
             departamento: 'Ingeniería de Sistemas',
         });
-        await Estudiante.create({
-            nombre: usuarioDoc.nombre,
-            correo: usuarioDoc.correo,
-            codigo: codigo,
-        });
-        console.log(`   ✅ monitor     ${m.nombre} (tutor + estudiante)`);
-        creados++;
+        console.log(`   ✅ monitor     ${m.nombre} → tutor   (${m.correo})`);
+
+        // Cuenta estudiante (email diferente, mismo nombre y código)
+        await Usuario.create({ nombre: m.nombre, correo: correoEstudiante, password: m.password, rol: 'estudiante' });
+        await Estudiante.create({ nombre: m.nombre, correo: correoEstudiante, codigo });
+        console.log(`   ✅ monitor     ${m.nombre} → estudiante (${correoEstudiante})`);
+
+        creados += 2;
         docentesCreados++;
         estudiantesCreados++;
         monitoresCreados++;
@@ -501,7 +506,9 @@ async function seed() {
     console.log('   Admin       → admin.ti@campusucc.edu.co         /  Admin2026!');
     console.log('   Tutores     → contraseña: Tutoria2026            (ej: torresc@campusucc.edu.co)');
     console.log('   Estudiantes → contraseña: Estudio2026            (ej: agudelomj@campusucc.edu.co)');
-    console.log('   Monitores   → contraseña: Monitor2026            (ej: javier.nietob@campusucc.edu.co)');
+    console.log('   Monitores   → contraseña: Monitor2026');
+    console.log('                 tutor:      javier.nietob@campusucc.edu.co  /  jhilmer.cala@campusucc.edu.co');
+    console.log('                 estudiante: javier.nieto.est@campusucc.edu.co  /  jhilmer.cala.est@campusucc.edu.co');
 
     await mongoose.disconnect();
 }

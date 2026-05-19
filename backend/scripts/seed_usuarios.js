@@ -31,12 +31,12 @@ const TUTORES = [
     { nombre: 'Yomaira Guzman Paredes',         correo: 'guzmanpy@campusucc.edu.co'  },
 ];
 
-// Monitores: estudiantes que también dan tutorías.
-// Se crean con rol 'tutor' para acceso al dashboard de tutores
-// y adicionalmente se registran en la colección de estudiantes.
+// Monitores: dos cuentas cada uno.
+// correo      → rol tutor    (gestionar tutorías)
+// correoEst   → rol estudiante (pedir tutorías)
 const MONITORES = [
-    { nombre: 'Javier Esneider Nieto Bello',  correo: 'javier.nietob@campusucc.edu.co', codigo: '200001' },
-    { nombre: 'Jhilmer Alejandro Cala Celis', correo: 'jhilmer.cala@campusucc.edu.co',  codigo: '200002' },
+    { nombre: 'Javier Esneider Nieto Bello',  correo: 'javier.nietob@campusucc.edu.co',    correoEst: 'javier.nieto.est@campusucc.edu.co',  codigo: '200001' },
+    { nombre: 'Jhilmer Alejandro Cala Celis', correo: 'jhilmer.cala@campusucc.edu.co',     correoEst: 'jhilmer.cala.est@campusucc.edu.co',  codigo: '200002' },
 ];
 
 const ESTUDIANTES_PRUEBA = [
@@ -80,19 +80,31 @@ async function seed() {
         creados++;
     }
 
-    // ── Monitores → usuario (rol tutor) + docente + estudiante ───
+    // ── Monitores → cuenta tutor + cuenta estudiante ───────────────
     for (const m of MONITORES) {
-        const existe = await Usuario.findOne({ correo: m.correo });
-        if (existe) {
+        // Cuenta tutor
+        const existeTutor = await Usuario.findOne({ correo: m.correo });
+        if (existeTutor) {
             console.log(`  ⚠  Omitido (ya existe): ${m.correo}`);
             omitidos++;
-            continue;
+        } else {
+            await Usuario.create({ nombre: m.nombre, correo: m.correo, password: 'Monitor2026', rol: 'tutor' });
+            await Docente.create({ nombre: m.nombre, correo: m.correo });
+            console.log(`  ✅ Monitor tutor:      ${m.nombre} → ${m.correo}`);
+            creados++;
         }
-        await Usuario.create({ nombre: m.nombre, correo: m.correo, password: 'Monitor2026', rol: 'tutor' });
-        await Docente.create({ nombre: m.nombre, correo: m.correo });
-        await Estudiante.create({ nombre: m.nombre, correo: m.correo, codigo: m.codigo });
-        console.log(`  ✅ Monitor creado: ${m.nombre} → ${m.correo} (tutor + estudiante)`);
-        creados++;
+
+        // Cuenta estudiante
+        const existeEst = await Usuario.findOne({ correo: m.correoEst });
+        if (existeEst) {
+            console.log(`  ⚠  Omitido (ya existe): ${m.correoEst}`);
+            omitidos++;
+        } else {
+            await Usuario.create({ nombre: m.nombre, correo: m.correoEst, password: 'Monitor2026', rol: 'estudiante' });
+            await Estudiante.create({ nombre: m.nombre, correo: m.correoEst, codigo: m.codigo });
+            console.log(`  ✅ Monitor estudiante: ${m.nombre} → ${m.correoEst}`);
+            creados++;
+        }
     }
 
     console.log(`\n🎉 Seed completado: ${creados} creados, ${omitidos} omitidos`);
