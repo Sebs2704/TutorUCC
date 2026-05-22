@@ -133,6 +133,12 @@
   border-color: rgba(239,68,68,.4);
   color: #fca5a5;
 }
+.admin-sidebar__manual { text-decoration: none; }
+.admin-sidebar__manual:hover {
+  background: rgba(59,130,246,.15);
+  border-color: rgba(59,130,246,.4);
+  color: #93c5fd;
+}
 
 /* ── Main content ── */
 .admin-main {

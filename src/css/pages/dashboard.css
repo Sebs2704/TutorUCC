@@ -589,6 +589,11 @@
   border-color: #ef4444; color: #ef4444;
 }
 .btn-logout svg { flex-shrink: 0; }
+.btn-manual { text-decoration: none; }
+.btn-manual:hover {
+  background: rgba(59,130,246,.08);
+  border-color: #3b82f6; color: #3b82f6;
+}
 
 .site-header__brand {
   display: flex; align-items: center; gap: 14px;
